@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f6f8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="家賃です。">
+  <meta name="description" content="楽天カードの請求額を入力するだけ。ふたりの振込額をその場で計算。">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <title>家賃です。 | ふたりの家計精算</title>
+  <style>
+    :root {
+      font-family: Meiryo, "メイリオ", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      color: #17243a; background: #f5f6f8; font-synthesis: none;
+      -webkit-font-smoothing: antialiased;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; -webkit-text-size-adjust: 100%; }
+    body { margin: 0; min-height: 100svh; background: #f5f6f8; }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #8eafe0; outline-offset: 3px; }
+    .app { width: min(100%, 480px); margin: 0 auto; padding: calc(20px + env(safe-area-inset-top, 0px)) 18px calc(22px + env(safe-area-inset-bottom, 0px)); }
+    .top { display: flex; align-items: center; gap: 11px; margin-bottom: 22px; }
+    .mark { width: 41px; height: 41px; display: grid; place-items: center; border-radius: 14px; color: #fff; background: #213f65; font-weight: 800; font-size: 23px; flex-shrink: 0; }
+    .brand { min-width: 0; flex: 1; }
+    .brand strong { display: block; font-size: 18px; font-weight: 800; letter-spacing: -.05em; line-height: 1.35; }
+    .brand span { display: block; color: #7a8798; font-size: 10px; letter-spacing: .09em; margin-top: 2px; font-weight: 700; }
+    .round { border: 1px solid #e5e9ee; width: 42px; height: 42px; background: white; display: grid; place-items: center; border-radius: 13px; color: #425975; }
+    .round svg { width: 19px; height: 19px; }
+    .panel { background: #fff; border: 1px solid #edf0f2; box-shadow: 0 6px 24px rgba(30,50,75,.045); border-radius: 23px; }
+    .bill-card { padding: 22px 20px 19px; }
+    .eyebrow { margin: 0 0 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; letter-spacing: -.01em; }
+    .eyebrow .muted { font-weight: 500; font-size: 11px; color: #8d97a3; }
+    .bill-field { border-radius: 17px; border: 1.5px solid #dae3ea; height: 76px; display: flex; align-items: center; padding: 0 18px; transition: border .2s, box-shadow .2s; }
+    .bill-field:focus-within { border-color: #6e9ac5; box-shadow: 0 0 0 3px #edf5fc; }
+    .bill-field input { min-width: 0; flex: 1; width: 100%; border: 0; outline: 0; font-size: clamp(30px, 9vw, 39px); font-weight: 800; letter-spacing: -.05em; color: #152b46; background: transparent; font-variant-numeric: tabular-nums; }
+    .bill-field input:focus-visible { outline: 0; }
+    .bill-field input::placeholder { color: #c1cbd4; }
+    .bill-field .unit { color: #556b82; font-size: 20px; font-weight: 800; padding-left: 8px; }
+    .bill-hint { color: #8491a0; font-size: 11px; margin: 11px 1px 0; display: flex; gap: 7px; align-items: center; line-height: 1.5; }
+    .bill-hint svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .section-title { margin: 25px 2px 11px; display: flex; align-items: center; justify-content: space-between; }
+    .section-title h2 { font-size: 14px; letter-spacing: -.04em; font-weight: 800; margin: 0; }
+    .section-title span { font-size: 10px; color: #6a8ca5; font-weight: 700; background: #e9f1f8; border-radius: 99px; padding: 5px 10px; }
+    .people { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 11px; }
+    .person { border-radius: 21px; padding: 17px 14px 16px; min-width: 0; position: relative; overflow: hidden; }
+    .person.a { background: #e9f0f7; color: #234465; }
+    .person.b { background: #eff2ec; color: #426447; }
+    .person-name { font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 7px; }
+    .person-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .7; flex-shrink: 0; }
+    .person-value { margin-top: 13px; font-size: clamp(22px, 6.2vw, 29px); font-weight: 800; letter-spacing: -.06em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .person-value small { font-size: 13px; margin-left: 2px; letter-spacing: 0; }
+    .person-desc { font-size: 10px; opacity: .8; margin-top: 9px; }
+    .total { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; border-radius: 17px; color: #fff; background: #253f5c; padding: 15px 18px; gap: 12px; }
+    .total-label { font-size: 12px; font-weight: 800; }
+    .total-label span { display: block; margin-top: 4px; font-size: 10px; color: #b9c9da; font-weight: 500; }
+    .total-number { white-space: nowrap; font-size: 22px; letter-spacing: -.04em; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .total-number small { font-size: 12px; margin-left: 2px; }
+    .breakdown { padding: 18px 17px 15px; margin-top: 13px; }
+    .breakdown-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .breakdown-head h2 { font-size: 13px; margin: 0; letter-spacing: -.03em; }
+    .edit-inline { border: 0; background: transparent; color: #54799c; font-weight: 700; font-size: 11px; padding: 5px 1px 5px 8px; }
+    .table-head, .cost-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap: 6px; align-items: baseline; }
+    .table-head { color: #9aa5b1; font-size: 10px; margin-bottom: 6px; }
+    .table-head span:not(:first-child), .cost-row span:not(:first-child) { text-align: right; }
+    .cost-row { padding: 12px 0; border-bottom: 1px solid #f0f2f4; font-size: 12px; }
+    .cost-row:last-child { border-bottom: 0; padding-bottom: 3px; }
+    .cost-row .name { color: #66778b; font-size: 11px; }
+    .cost-row .number { font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.03em; white-space: nowrap; }
+    .breakdown-note { font-size: 10px; color: #8492a1; line-height: 1.6; margin-top: 13px; }
+    .warning { display: none; align-items: flex-start; gap: 8px; background: #fff4e4; color: #8b5f1d; border-radius: 12px; padding: 11px 13px; font-size: 11px; line-height: 1.6; margin-top: 12px; }
+    .warning.visible { display: flex; }
+    .actions { display: grid; grid-template-columns: 1fr; margin-top: 14px; }
+    .copy { border: none; border-radius: 15px; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 9px; background: #fff; border: 1px solid #d9e1e8; color: #2a4d70; font-weight: 800; font-size: 13px; }
+    .copy svg { width: 17px; height: 17px; }
+    .bottom-note { color: #9aa5b0; font-size: 10px; text-align: center; margin: 16px 0 0; line-height: 1.6; }
+    .overlay { position: fixed; inset: 0; background: rgba(14,30,48,.4); z-index: 5; opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; }
+    .overlay.show { opacity: 1; visibility: visible; }
+    .sheet { position: fixed; left: 0; right: 0; bottom: 0; margin: auto; z-index: 6; max-width: 480px; background: #fff; border-radius: 24px 24px 0 0; padding: 19px 22px calc(23px + env(safe-area-inset-bottom, 0px)); transform: translateY(105%); transition: transform .25s ease; max-height: min(92svh, 780px); overflow-y: auto; overscroll-behavior: contain; }
+    .sheet.show { transform: translateY(0); }
+    .sheet-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+    .sheet-top h2 { font-size: 17px; margin: 0; }
+    .close { border: none; background: #f2f4f6; color: #4c5f75; border-radius: 10px; width: 33px; height: 33px; font-size: 23px; line-height: 1; }
+    .settings-desc { font-size: 11px; color: #8794a1; margin: 0 0 21px; line-height: 1.7; }
+    .field-label { display: block; margin-bottom: 8px; color: #334a62; font-weight: 800; font-size: 12px; }
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .settings-field { margin-bottom: 18px; min-width: 0; }
+    .settings-input { border: 1px solid #dae1e7; border-radius: 12px; padding: 0 11px; height: 51px; display: flex; align-items: center; }
+    .settings-input input { width: 100%; min-width: 0; background: none; border: none; outline: 0; color: #203c58; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .settings-input small { font-size: 12px; color: #7b8b99; }
+    .settings-summary { display: flex; align-items: center; justify-content: space-between; background: #f5f7f9; padding: 15px; border-radius: 12px; font-size: 12px; margin-bottom: 20px; }
+    .settings-summary strong { font-size: 16px; }
+    .save { width: 100%; min-height: 54px; border-radius: 15px; border: 0; background: #234b73; color: white; font-size: 14px; font-weight: 800; }
+    .toast { position: fixed; z-index: 10; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%,15px); opacity: 0; pointer-events: none; background: #203e5f; color: white; border-radius: 100px; white-space: nowrap; font-size: 12px; padding: 12px 18px; transition: opacity .2s, transform .2s; }
+    .toast.show { opacity: 1; transform: translate(-50%,0); }
+    body.modal-open { overflow: hidden; }
+    @media (min-width: 700px) { .app { padding-top: 45px; } }
+    @media (max-width: 360px) { .app { padding-left: 13px; padding-right: 13px; } .person { padding-left: 11px; padding-right: 10px; } .person-value { font-size: 22px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <div class="mark" aria-hidden="true">¥</div>
+      <div class="brand"><strong>家賃です。</strong><span>ふたりの家計精算</span></div>
+      <button class="round" type="button" id="openSettings" aria-label="家計の設定を開く" title="設定">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.6" fill="white"/><circle cx="16" cy="17" r="2.6" fill="white"/></svg>
+      </button>
+    </header>
+
+    <section class="panel bill-card" aria-label="カード請求額">
+      <label class="eyebrow" for="billInput"><span>楽天カードの請求額</span><span class="muted">ここだけ入力</span></label>
+      <div class="bill-field">
+        <input id="billInput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-label="楽天カードの請求額、円" placeholder="0">
+        <span class="unit">円</span>
+      </div>
+      <p class="bill-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M4 12l5 5 4-4 7-7"/></svg>入力すると、ふたりの振込額を自動計算します</p>
+    </section>
+
+    <div class="section-title"><h2>今月の振込額</h2><span>自動計算</span></div>
+    <section class="people" aria-label="それぞれの振込額" aria-live="polite">
+      <div class="person a">
+        <div class="person-name"><span class="person-dot"></span>翔太</div>
+        <div class="person-value"><span id="personA">90,000</span><small>円</small></div>
+        <div class="person-desc">固定費 ＋ 変動費 ＋ 食費</div>
+      </div>
+      <div class="person b">
+        <div class="person-name"><span class="person-dot"></span>志穂</div>
+        <div class="person-value"><span id="personB">70,000</span><small>円</small></div>
+        <div class="person-desc">固定費 ＋ 変動費 ＋ 食費</div>
+      </div>
+    </section>
+
+    <section class="total" aria-label="振込合計">
+      <div class="total-label">振込合計<span>楽天カード ＋ 食費チャージ</span></div>
+      <div class="total-number"><span id="totalAmount">160,000</span><small>円</small></div>
+    </section>
+    <div id="warning" class="warning" role="status">カード請求額が固定費より少なくなっています。請求額・設定を確認してください。</div>
+
+    <section class="panel breakdown" aria-label="内訳">
+      <div class="breakdown-head"><h2>計算の内訳</h2><button class="edit-inline" type="button" id="editSettings">設定を変更 ›</button></div>
+      <div class="table-head"><span>項目</span><span>翔太</span><span>志穂</span></div>
+      <div class="cost-row"><span class="name">固定費</span><span class="number" id="fixedA">61,000円</span><span class="number" id="fixedB">41,000円</span></div>
+      <div class="cost-row"><span class="name">変動費（折半）</span><span class="number" id="variableA">15,000円</span><span class="number" id="variableB">15,000円</span></div>
+      <div class="cost-row"><span class="name">食費チャージ</span><span class="number" id="foodA">14,000円</span><span class="number" id="foodB">14,000円</span></div>
+      <p class="breakdown-note">固定費 <b id="fixedTotal">102,000円</b>をカード請求から引き、残りの変動費を折半。食費はカード請求とは別に加算しています。</p>
+    </section>
+
+    <div class="actions"><button id="copyButton" class="copy" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+      振込額をコピーする
+    </button></div>
+    <p class="bottom-note">設定と請求額はこの端末に保存されます。<br>サーバーへの送信やログインは不要です。</p>
+  </main>
+
+  <div id="overlay" class="overlay" aria-hidden="true"></div>
+  <section id="settingsSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
+    <div class="sheet-top"><h2 id="settingsTitle">毎月の設定</h2><button id="closeSettings" class="close" type="button" aria-label="閉じる">×</button></div>
+    <p class="settings-desc">普段は変更不要です。負担額が変わったときだけ編集してください。</p>
+    <div class="settings-grid">
+      <div class="settings-field"><label class="field-label" for="settingsA">翔太の固定費</label><div class="settings-input"><input id="settingsA" type="text" inputmode="numeric" autocomplete="off"><small>円</small></div></div>
+      <div class="settings-field"><label class="field-label" for="settingsB">志穂の固定費</label><div class="settings-input"><input id="settingsB" type="text" inputmode="numeric" autocomplete="off"><small>円</small></div></div>
+    </div>
+    <div class="settings-field"><label class="field-label" for="settingsFood">食費チャージ（カード請求とは別）</label><div class="settings-input"><input id="settingsFood" type="text" inputmode="numeric" autocomplete="off"><small>円</small></div></div>
+    <div class="settings-summary"><span>固定費の合計</span><strong id="settingsTotal">102,000円</strong></div>
+    <button id="saveSettings" class="save" type="button">設定を保存</button>
+    <p class="breakdown-note" style="text-align:center">変動費と食費は原則折半。端数1円は翔太側に加算します。</p>
+  </section>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      "use strict";
+      var KEY = "yachindesu-v1";
+      var defaults = { bill: 132000, fixedA: 61000, fixedB: 41000, food: 28000 };
+      var state = Object.assign({}, defaults);
+      var el = function (id) { return document.getElementById(id); };
+      var format = function (value) { return Number(value).toLocaleString("ja-JP"); };
+      var yen = function (value) { return format(value) + "円"; };
+      var digits = function (value) {
+        var normalized = String(value).replace(/[０-９]/g, function(c) { return String.fromCharCode(c.charCodeAt(0) - 65248); });
+        return normalized.replace(/[^0-9]/g, "").slice(0, 10);
+      };
+      var parse = function (value) { return Number(digits(value)) || 0; };
+      var val = function (n) { return Math.max(0, Math.min(9999999999, Math.floor(Number(n) || 0))); };
+      function load() {
+        try {
+          var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+          if (saved && typeof saved === "object") {
+            ["bill", "fixedA", "fixedB", "food"].forEach(function(key) {
+              if (saved[key] !== undefined && Number.isFinite(Number(saved[key]))) state[key] = val(saved[key]);
+            });
+          }
+        } catch (e) { /* storage may be unavailable */ }
+      }
+      function persist() {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
+      }
+      function calculate() {
+        var fixed = state.fixedA + state.fixedB;
+        var variable = state.bill - fixed;
+        var variableA = Math.ceil(variable / 2);
+        var variableB = variable - variableA;
+        var foodA = Math.ceil(state.food / 2);
+        var foodB = state.food - foodA;
+        return {
+          fixed: fixed, variable: variable, variableA: variableA, variableB: variableB,
+          foodA: foodA, foodB: foodB,
+          a: state.fixedA + variableA + foodA,
+          b: state.fixedB + variableB + foodB,
+          total: state.bill + state.food
+        };
+      }
+      function render() {
+        var r = calculate();
+        el("personA").textContent = format(r.a);
+        el("personB").textContent = format(r.b);
+        el("totalAmount").textContent = format(r.total);
+        el("fixedA").textContent = yen(state.fixedA);
+        el("fixedB").textContent = yen(state.fixedB);
+        el("variableA").textContent = yen(r.variableA);
+        el("variableB").textContent = yen(r.variableB);
+        el("foodA").textContent = yen(r.foodA);
+        el("foodB").textContent = yen(r.foodB);
+        el("fixedTotal").textContent = yen(r.fixed);
+        el("warning").classList.toggle("visible", state.bill < r.fixed);
+      }
+      function inputCurrency(input) {
+        input.addEventListener("focus", function() { input.value = String(parse(input.value)); });
+        input.addEventListener("blur", function() { input.value = format(parse(input.value)); });
+      }
+      function openSheet() {
+        ["A","B","Food"].forEach(function(key) {
+          el("settings" + key).value = format(state[key === "Food" ? "food" : "fixed" + key]);
+        });
+        refreshSettingsTotal();
+        el("overlay").classList.add("show");
+        el("settingsSheet").classList.add("show");
+        el("settingsSheet").setAttribute("aria-hidden", "false");
+        document.body.classList.add("modal-open");
+        el("closeSettings").focus();
+      }
+      function closeSheet() {
+        el("overlay").classList.remove("show");
+        el("settingsSheet").classList.remove("show");
+        el("settingsSheet").setAttribute("aria-hidden", "true");
+        document.body.classList.remove("modal-open");
+        el("openSettings").focus();
+      }
+      function refreshSettingsTotal() {
+        el("settingsTotal").textContent = yen(parse(el("settingsA").value) + parse(el("settingsB").value));
+      }
+      var toastTimeout;
+      function toast(message) {
+        el("toast").textContent = message;
+        el("toast").classList.add("show");
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function () { el("toast").classList.remove("show"); }, 2400);
+      }
+      function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text);
+        }
+        return new Promise(function(resolve, reject) {
+          var t = document.createElement("textarea");
+          t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+          document.body.appendChild(t); t.focus(); t.select();
+          var ok = document.execCommand("copy");
+          document.body.removeChild(t);
+          if (ok) resolve(); else reject(new Error("copy failed"));
+        });
+      }
+      load();
+      el("billInput").value = format(state.bill);
+      inputCurrency(el("billInput"));
+      el("billInput").addEventListener("input", function() {
+        var current = digits(this.value);
+        state.bill = val(current);
+        persist(); render();
+      });
+      el("billInput").addEventListener("blur", function() {
+        this.value = format(state.bill);
+      });
+      ["A", "B", "Food"].forEach(function(key) {
+        var input = el("settings" + key);
+        inputCurrency(input);
+        input.addEventListener("input", refreshSettingsTotal);
+      });
+      el("openSettings").addEventListener("click", openSheet);
+      el("editSettings").addEventListener("click", openSheet);
+      el("closeSettings").addEventListener("click", closeSheet);
+      el("overlay").addEventListener("click", closeSheet);
+      document.addEventListener("keydown", function(e) { if (e.key === "Escape" && el("settingsSheet").classList.contains("show")) closeSheet(); });
+      el("saveSettings").addEventListener("click", function() {
+        state.fixedA = val(parse(el("settingsA").value));
+        state.fixedB = val(parse(el("settingsB").value));
+        state.food = val(parse(el("settingsFood").value));
+        persist(); render(); closeSheet(); toast("設定を保存しました");
+      });
+      el("copyButton").addEventListener("click", function() {
+        var r = calculate();
+        var message = "【今月の家計振込】\n翔太：" + yen(r.a) + "\n志穂：" + yen(r.b) + "\n合計：" + yen(r.total) +
+          "\n（楽天カード：" + yen(state.bill) + " ＋ 食費：" + yen(state.food) + "）";
+        copyText(message).then(function() { toast("振込額をコピーしました"); }).catch(function() { toast("コピーできませんでした"); });
+      });
+      render();
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function() { navigator.serviceWorker.register("./sw.js").catch(function() {}); });
+      }
+    })();
+  </script>
+</body>
+</html>
