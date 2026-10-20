@@ -1,12 +1,12 @@
 {
-  "name": "家賃です。- ふたりの家計精算",
-  "short_name": "家賃です。",
-  "description": "楽天カードの請求額から夫婦それぞれの振込額を即時計算",
+  "name": "家賃デス - ふたりの家計精算",
+  "short_name": "家賃デス",
+  "description": "楽天カードの請求額からふたりの振込額をすぐ計算",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f6f8",
-  "theme_color": "#f5f6f8",
+  "background_color": "#ffcae4",
+  "theme_color": "#88cdff",
   "orientation": "portrait",
   "icons": [
     {
