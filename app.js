@@ -14,6 +14,7 @@ const old=read(OLD,{});
 const settings={...DEFAULTS,...Object.fromEntries(["fixedA","fixedB","food"].map(k=>[k,money(old[k]===undefined?DEFAULTS[k]:old[k])]))};
 const initialMonths=read(HISTORY,{});
 const months=initialMonths&&typeof initialMonths==="object"&&!Array.isArray(initialMonths)?initialMonths:{};
+settings.updatedAt=Number(old.updatedAt)||0;
 const state={
  settings,months,
  month:validMonth(read(CURMONTH,todayMonth()))?read(CURMONTH,todayMonth()):todayMonth(),
@@ -24,7 +25,7 @@ const state={
 if(!validMonth(state.month))state.month=todayMonth();
 const snapshotMonth=state.months[state.month];
 if(snapshotMonth&&Number.isFinite(Number(snapshotMonth.bill)))state.draft=money(snapshotMonth.bill);
-let firebase=null,firestore=null,auth=null,unsubscribers=[],syncBusy=false,shareReady=false;
+let syncEngine=null,shareBusy=false;
 let lastToastTimer=0,lastFocusedTab="calc";
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(lastToastTimer);lastToastTimer=setTimeout(()=>$("toast").classList.remove("show"),2300);}
 function billResult(bill,cfg){
@@ -53,7 +54,7 @@ function saveOld(){store(OLD,{bill:state.draft,...state.settings});}
 function commitMonth(){
  const doc={bill:state.draft,...state.settings,updatedAt:Date.now()};
  state.months[state.month]=doc;store(HISTORY,state.months);saveOld();renderHistory();renderCalc();toast(state.month.replace("-","年")+"月を登録したデス！");
- if(firestore&&state.room)pushMonth(state.month,doc);
+ if(syncEngine)syncEngine.changed();
 }
 function setTab(tab){
  if(!["calc","history","share","reminder"].includes(tab))return;
@@ -133,8 +134,8 @@ function refreshSettingTotal(){$("settingsTotal").textContent=yen(money(digits($
 });
 $("saveSettings").addEventListener("click",()=>{
  state.settings.fixedA=money(digits($("settingsA").value));state.settings.fixedB=money(digits($("settingsB").value));state.settings.food=money(digits($("settingsFood").value));
- store(OLD,{bill:state.draft,...state.settings});modal(false);renderCalc();toast("毎月の設定を保存したデス！");
- if(firestore&&state.room)pushSettings(state.settings);
+ state.settings.updatedAt=Date.now();store(OLD,{bill:state.draft,...state.settings});modal(false);renderCalc();toast("毎月の設定を保存したデス！");
+ if(syncEngine)syncEngine.changed();
 });
 function copy(text){
  if(navigator.clipboard?.writeText)return navigator.clipboard.writeText(text);
@@ -173,100 +174,119 @@ async function checkReminder(){
 }
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminder();});
 window.addEventListener("focus",checkReminder);setInterval(checkReminder,3600000);
-function statusPill(label){$("netPill").textContent=label;}
+function statusPill(s){
+ const labels={local:navigator.onLine?"端末保存":"オフライン",waiting:"同期待ち",syncing:"同期中",synced:"共有中",offline:"オフライン",retry:"再接続中",invalid:"招待リンクエラー"};
+ $("netPill").textContent=labels[s]||s;
+ $("syncState").textContent=labels[s]||s;
+}
 function renderShare(){
- const connected=!!(firebase&&state.room);
- $("setupShare").hidden=connected;
+ const connected=!!syncEngine?.getRoom();
  $("connectedShare").hidden=!connected;
- $("startShare").disabled=!firebase||syncBusy;
- $("startShare").textContent=firebase?"共有ルームを作成":"Firebase接続後に利用可能";
- $("joinWrap").hidden=!firebase;
- $("shareTitle").textContent=connected?"夫婦の共有ルーム":"共有の設定";
- $("shareMessage").textContent=connected?"保存した月別データを2台で自動同期します。オフラインでは端末に記録し、接続復帰後に同期します。":"この端末では月別記録が利用できます。リアルタイム共同編集にはFirebaseを接続してください。";
- $("syncState").textContent=connected?(navigator.onLine?"クラウド共有中":"オフライン保存中"):"この端末のみ";
+ $("setupShare").hidden=connected;
+ $("startShare").disabled=shareBusy;
+ $("startShare").textContent=shareBusy?"接続しています…":"共有ルームを作成";
+ $("joinWrap").hidden=false;
+ $("shareTitle").textContent=connected?"夫婦で共同編集":"夫婦で共同編集しよう";
+ $("shareMessage").textContent=connected
+  ?"TABIと同じ暗号化同期方式。月別の履歴や固定費は、共有リンクで参加した端末に自動で反映されます。"
+  :"共有ルームを作成し、招待リンクを奥さんに送ってください。月別データを一緒に編集できます。";
+ $("syncState").textContent=connected?(navigator.onLine?"同期対応・接続中":"オフライン保存中"):"この端末のみ";
 }
-function extractRoom(s){
- const value=String(s||"").trim();const match=value.match(/(?:#room=|^)([A-Za-z0-9_-]{32})(?:$|&)/);
- return match?match[1]:null;
+function applyRemote(data){
+ const oldMonths=Object.keys(state.months);
+ oldMonths.forEach(k=>delete state.months[k]);
+ Object.assign(state.months,data.months||{});
+ store(HISTORY,state.months);
+ if(data.settings){
+  Object.assign(state.settings,data.settings);
+  saveOld();
+ }
+ if(document.activeElement!==input){
+  const selected=state.months[state.month];
+  if(selected){state.draft=money(selected.bill);renderBill();}
+ }
+ renderHistory();
+ renderCalc();
+ renderShare();
 }
-function inviteLink(){return location.href.split("#")[0]+"#room="+encodeURIComponent(state.room);}
-function generateRoom(){const b=new Uint8Array(24);crypto.getRandomValues(b);return btoa(String.fromCharCode(...b)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
-$("copyInvite").addEventListener("click",()=>copy(inviteLink()).then(()=>toast("招待リンクをコピーしたデス！")).catch(()=>toast("コピーできませんでした")));
+function snapshotForSync(){
+ return {
+  months:state.months,
+  settings:{fixedA:state.settings.fixedA,fixedB:state.settings.fixedB,food:state.settings.food,updatedAt:state.settings.updatedAt||0}
+ };
+}
+function link(){
+ return syncEngine?.invite()||"";
+}
+$("copyInvite").addEventListener("click",()=>{
+ const value=link();
+ if(!value){toast("共有リンクがありません");return;}
+ copy(value).then(()=>toast("招待リンクをコピーしたデス！")).catch(()=>toast("コピーできませんでした"));
+});
 $("leaveRoom").addEventListener("click",()=>{
- unsubscribers.forEach(fn=>fn());unsubscribers=[];state.room="";store(ROOM,"");history.replaceState(null,"",location.href.split("#")[0]);statusPill(navigator.onLine?"端末保存":"オフライン");renderShare();toast("この端末の共有を解除しました");
+ if(!syncEngine)return;
+ syncEngine.leave();
+ history.replaceState(null,"",location.pathname+location.search);
+ renderShare();
+ toast("共有を解除しました。端末の記録は残ります");
 });
 $("startShare").addEventListener("click",async()=>{
- if(!firebase||syncBusy)return;
- const room=generateRoom();state.room=room;store(ROOM,room);history.replaceState(null,"",inviteLink());
- await connectRoom(true);renderShare();
+ if(!syncEngine||shareBusy)return;
+ shareBusy=true;renderShare();
+ try{
+  await syncEngine.createRoom();
+  toast("共有ルームができたデス！");
+  history.replaceState(null,"",location.pathname+location.search);
+ }catch(e){
+  console.warn("share create",e);
+  toast(navigator.onLine===false?"通信接続が必要です":"共有ルームの作成に失敗しました");
+ }finally{shareBusy=false;renderShare();}
 });
 $("joinShare").addEventListener("click",async()=>{
- const room=extractRoom($("joinCode").value);
- if(!room){toast("招待リンクを確認してください");return;}
- state.room=room;store(ROOM,room);history.replaceState(null,"",inviteLink());await connectRoom(false);renderShare();
+ if(!syncEngine||shareBusy)return;
+ const invite=window.YachinSync?.parseInvite($("joinCode").value);
+ if(!invite){toast("有効な招待リンクを入力してください");return;}
+ shareBusy=true;renderShare();
+ try{
+  await syncEngine.joinRoom(invite);
+  history.replaceState(null,"",location.pathname+location.search);
+  toast("ふたりの家計に参加したデス！");
+ }catch(e){
+  console.warn("join shared room",e);
+  toast("参加できませんでした。リンクか通信を確認してください");
+ }finally{shareBusy=false;renderShare();}
 });
-function getConfig(){const c=window.YACHIN_FIREBASE_CONFIG;return c&&c.apiKey&&c.projectId&&c.authDomain&&c.appId?c:null;}
-async function initFirebase(){
- const config=getConfig();
- if(!config){renderShare();statusPill(navigator.onLine?"端末保存":"オフライン");return;}
- try{
-  const [appMod,authMod,dbMod]=await Promise.all([
-   import("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js"),
-   import("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js"),
-   import("https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js")
-  ]);
-  const app=appMod.initializeApp(config);auth=authMod.getAuth(app);
-  try{firestore=dbMod.initializeFirestore(app,{localCache:dbMod.persistentLocalCache({tabManager:dbMod.persistentMultipleTabManager()})});}
-  catch(e){firestore=dbMod.getFirestore(app);}
-  await authMod.signInAnonymously(auth);
-  firebase={...dbMod};
-  if(!state.room){renderShare();statusPill("共有準備OK");}
-  else await connectRoom(false);
- }catch(e){console.warn("Firebase not connected",e);firebase=null;firestore=null;statusPill("端末保存");renderShare();}
-}
-async function pushMonth(month,entry){
- if(!firebase||!firestore||!state.room)return;
- try{await firebase.setDoc(firebase.doc(firestore,"rooms",state.room,"months",month),entry);}catch(e){statusPill("同期待ち");console.warn("sync month",e);}
-}
-async function pushSettings(cfg){
- if(!firebase||!firestore||!state.room)return;
- try{await firebase.setDoc(firebase.doc(firestore,"rooms",state.room,"meta","settings"),cfg);}catch(e){statusPill("同期待ち");console.warn("sync settings",e);}
-}
-async function connectRoom(newRoom){
- if(!firebase||!state.room)return;syncBusy=true;unsubscribers.forEach(fn=>fn());unsubscribers=[];
- try{
-  if(newRoom){
-   await pushSettings({...state.settings});
-   for(const [month,entry] of Object.entries(state.months)){if(validMonth(month))await pushMonth(month,entry);}
-  }
-  const rooms=firebase.collection(firestore,"rooms",state.room,"months");
-  unsubscribers.push(firebase.onSnapshot(rooms,snapshot=>{
-   snapshot.docChanges().forEach(change=>{
-    const month=change.doc.id;if(!validMonth(month))return;
-    if(change.type==="removed")delete state.months[month];
-    else state.months[month]=change.doc.data();
+window.addEventListener("online",()=>{statusPill(syncEngine?.getRoom()?"waiting":"local");renderShare();});
+window.addEventListener("offline",()=>{statusPill("offline");renderShare();});
+const initialInvite=window.YachinSync?.parseInvite(location.hash);
+if(!window.YachinSync){
+ statusPill("local");
+ console.warn("yachin-sync.js is missing");
+}else{
+ syncEngine=window.YachinSync.create({
+  getData:snapshotForSync,
+  onData:applyRemote,
+  onStatus:statusPill,
+  onRoom:()=>renderShare()
+ });
+ if(initialInvite){
+  setTab("share");
+  const current=syncEngine.getRoom();
+  if(!current||current.roomId!==initialInvite.roomId){
+   shareBusy=true;renderShare();
+   syncEngine.joinRoom(initialInvite).then(()=>{
+    history.replaceState(null,"",location.pathname+location.search);
+    toast("共有リンクから参加したデス！");
+   }).catch(e=>{console.warn("invite failed",e);toast("招待リンクを確認してください");}).finally(()=>{
+    shareBusy=false;renderShare();
    });
-   store(HISTORY,state.months);
-   if(state.months[state.month]&&document.activeElement!==input){state.draft=money(state.months[state.month].bill);renderBill();}
-   renderHistory();statusPill(snapshot.metadata.fromCache?"ローカル同期":"共有中");renderShare();
-  },e=>{statusPill("同期エラー");console.warn("month listener",e);}));
-  const settingsRef=firebase.doc(firestore,"rooms",state.room,"meta","settings");
-  unsubscribers.push(firebase.onSnapshot(settingsRef,s=>{
-   if(!s.exists())return;
-   const cfg=s.data();if(!["fixedA","fixedB","food"].every(k=>Number.isFinite(Number(cfg[k]))))return;
-   Object.assign(state.settings,{fixedA:money(cfg.fixedA),fixedB:money(cfg.fixedB),food:money(cfg.food)});
-   saveOld();renderCalc();
-  },e=>console.warn("settings listener",e)));
-  statusPill(navigator.onLine?"共有中":"オフライン");
-  toast(newRoom?"共有ルームを作成したデス！":"家族の家計に接続したデス！");
- }catch(e){console.warn("room connect",e);statusPill("共有できません");toast("共有接続に失敗しました");}
- finally{syncBusy=false;renderShare();}
+  }else{
+   history.replaceState(null,"",location.pathname+location.search);
+   syncEngine.sync();
+  }
+ }
 }
-window.addEventListener("online",()=>{statusPill(firebase&&state.room?"同期中":"端末保存");renderShare();});
-window.addEventListener("offline",()=>{statusPill("オフライン");renderShare();});
-const roomFromHash=extractRoom(location.hash);
-if(roomFromHash){state.room=roomFromHash;store(ROOM,roomFromHash);setTimeout(()=>setTab("share"),0);}
 renderBill();renderHistory();renderReminder();renderShare();checkReminder();
-statusPill(navigator.onLine?"端末保存":"オフライン");initFirebase();
+if(!initialInvite)statusPill(syncEngine?.getRoom()?"waiting":"local");
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});
 })();
