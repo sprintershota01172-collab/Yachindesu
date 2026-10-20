@@ -1,5 +1,5 @@
-/* 家賃デス - fast offline-first 3.1 */
-const CACHE="yachindesu-v4.0.0";
+/* 家賃デス v5 — full-screen UI offline-first */
+const CACHE="yachindesu-v5.0.0";
 const ASSETS = ["./","./index.html","./app.css","./app.js","./yachin-sync.js","./manifest.webmanifest","./icon.svg","./apple-touch-icon.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)
