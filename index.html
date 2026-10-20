@@ -23,6 +23,7 @@
  </header>
  <main class="pages" id="pages">
   <section class="page active" id="tab-calc" aria-label="計算">
+   <div class="page-inner">
    <div class="bill panel">
     <div class="labelbar"><label for="billInput">楽天カードの請求額</label><span>ここだけ入力！</span></div>
     <div class="billbox"><input id="billInput" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" placeholder="0" aria-label="楽天カードの請求額"><b>円</b></div>
@@ -45,34 +46,40 @@
    </div>
    <p id="calcWarning" class="warning" hidden>請求額が固定費より少ないため、計算結果を確認してください。</p>
    <div class="calc-actions"><button id="copyButton" type="button" class="gradient">振込額をコピー</button><button id="settingsButton" type="button" class="white-button">毎月の設定</button></div>
+   </div>
   </section>
   <section class="page" id="tab-history" aria-label="月別の変動" hidden>
+   <div class="page-inner">
    <div class="section-heading"><h2>月ごとの変動 <span>HISTORY</span></h2><p>登録した請求額を月別に比較</p></div>
    <div class="history-summary panel"><div><small>最新の登録月</small><strong id="latestMonth">—</strong></div><div><small>前月との差額</small><strong id="monthlyDelta">—</strong></div></div>
    <div class="panel chart-wrap"><div class="chart-head"><strong>楽天カード請求額の推移</strong><small>直近6か月</small></div><div id="chart" class="chart" role="img" aria-label="6か月のカード請求額の棒グラフ"></div></div>
    <div class="history-title"><strong>月別の記録</strong><button id="jumpMonth" type="button">今月を登録 ＋</button></div>
    <div id="historyList" class="history-list"></div>
-   <p class="sub-note">登録月をタップすると金額を修正できます。振込額はその月の設定に基づき再計算されます。</p>
+   <div class="history-pager" aria-label="履歴のページ切り替え"><button id="historyPrev" type="button" aria-label="前の履歴">‹ 前へ</button><span id="historyPageLabel" aria-live="polite">1 / 1</span><button id="historyNext" type="button" aria-label="次の履歴">次へ ›</button></div>
+   </div>
   </section>
   <section class="page" id="tab-share" aria-label="夫婦の共有" hidden>
+   <div class="page-inner">
    <div class="section-heading"><h2>ふたりで共有 <span>SHARE</span></h2><p>同じデータを2台のスマホで編集</p></div>
-   <div class="panel info-card"><div class="info-icon">♡</div><h3 id="shareTitle">共有の準備中</h3><p id="shareMessage">TABIと同じ暗号化共有リンクで、月別の記録をふたりで同期できます。</p><span id="syncState" class="pill muted-pill">この端末のみ</span></div>
+   <div class="panel info-card"><div class="info-icon">♡</div><h3 id="shareTitle">共有の準備中</h3><p id="shareMessage">共有リンクで夫婦の記録を自動同期できます。</p><span id="syncState" class="pill muted-pill">この端末のみ</span></div>
    <div id="connectedShare" class="panel sharing-tools" hidden>
     <div class="share-code-title">家族の共有リンク</div>
-    <p>このリンクを奥さんに送ると同じ家計データを編集できます。</p>
+    <p>LINEで招待すると、ふたりで編集できます。</p>
     <button id="copyInvite" class="gradient" type="button">招待リンクをコピー</button>
     <button id="leaveRoom" class="quiet" type="button">この端末の共有を解除</button>
-    <p class="sub-note">リンクを知っている人が編集できるため、第三者に送らないでください。</p>
+    <p class="sub-note">招待リンクは他人に送らないでください。</p>
    </div>
    <div id="setupShare" class="panel sharing-tools">
     <strong>リアルタイム共同編集</strong>
-    <p>TABI方式で共有ルームを作り、奥さんにリンクを送るだけ。オフライン中の編集は接続後に同期します。</p>
+    <p>ルームを作ってLINEで招待。オフライン中の変更も後から同期します。</p>
     <button id="startShare" class="gradient" type="button">共有ルームを作成</button>
-    <div id="joinWrap"><label for="joinCode">招待リンク</label><input id="joinCode" autocomplete="off" placeholder="TABI方式の家賃デス招待リンクを貼り付け"><button id="joinShare" type="button">参加</button></div>
-    <p class="sub-note">保存内容は暗号化されます。招待リンクを持つ人が編集できるため、他人には共有しないでください。</p>
+    <div id="joinWrap"><label for="joinCode">招待リンクで参加</label><div class="join-row"><input id="joinCode" autocomplete="off" placeholder="招待リンクを貼り付け"><button id="joinShare" type="button">参加</button></div></div>
+    <p class="sub-note">暗号化で保護。招待リンクは他人に共有しないでください。</p>
+   </div>
    </div>
   </section>
   <section class="page" id="tab-reminder" aria-label="毎月の通知" hidden>
+   <div class="page-inner">
    <div class="section-heading"><h2>毎月のお知らせ <span>REMIND</span></h2><p>忘れずに家賃登録</p></div>
    <div class="panel reminder">
     <label for="reminderDay">毎月何日にお知らせする？</label>
@@ -82,7 +89,8 @@
     <button id="askNotify" class="white-button full" type="button">通知の許可を確認</button>
     <p id="notifyStatus" class="sub-note">通知日はこの端末に保存されます。</p>
    </div>
-   <div class="panel caution"><strong>通知について</strong><p>アプリ起動時に指定日を確認してお知らせします。iPhoneでアプリを閉じているときにも確実にプッシュ通知を届けるには、通知サーバーの接続が必要です。</p></div>
+   <div class="panel caution"><strong>通知について</strong><p>指定日にはアプリを開くとお知らせします。アプリを閉じた状態で届く通知は、今後サーバー対応が必要です。</p></div>
+   </div>
   </section>
  </main>
  <nav class="tabs" aria-label="メインメニュー">
