@@ -1,0 +1,19 @@
+{
+  "name": "家賃です。- ふたりの家計精算",
+  "short_name": "家賃です。",
+  "description": "楽天カードの請求額から夫婦それぞれの振込額を即時計算",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#f5f6f8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
