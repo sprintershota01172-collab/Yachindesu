@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function secretRoom(roomId) {
+      return roomId.matches('^[A-Za-z0-9_-]{32}$');
+    }
+    function validMoney(x) { return x is int && x >= 0 && x <= 9999999999; }
+    function validSettings(data) {
+      return data.keys().hasOnly(['fixedA','fixedB','food']) &&
+        validMoney(data.fixedA) && validMoney(data.fixedB) && validMoney(data.food);
+    }
+    function validMonth(data) {
+      return data.keys().hasOnly(['bill','fixedA','fixedB','food','updatedAt']) &&
+        validMoney(data.bill) && validMoney(data.fixedA) &&
+        validMoney(data.fixedB) && validMoney(data.food) &&
+        data.updatedAt is int;
+    }
+    match /rooms/{roomId}/months/{monthId} {
+      allow get, list: if signedIn() && secretRoom(roomId) && monthId.matches('^[0-9]{4}-(0[1-9]|1[0-2])$');
+      allow create, update: if signedIn() && secretRoom(roomId) &&
+        monthId.matches('^[0-9]{4}-(0[1-9]|1[0-2])$') &&
+        validMonth(request.resource.data);
+      allow delete: if false;
+    }
+    match /rooms/{roomId}/meta/settings {
+      allow get: if signedIn() && secretRoom(roomId);
+      allow create, update: if signedIn() && secretRoom(roomId) && validSettings(request.resource.data);
+      allow delete: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
