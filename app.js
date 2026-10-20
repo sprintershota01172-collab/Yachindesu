@@ -26,7 +26,7 @@ if(!validMonth(state.month))state.month=todayMonth();
 const snapshotMonth=state.months[state.month];
 if(snapshotMonth&&Number.isFinite(Number(snapshotMonth.bill)))state.draft=money(snapshotMonth.bill);
 let syncEngine=null,shareBusy=false;
-let lastToastTimer=0,lastFocusedTab="calc";
+let lastToastTimer=0,lastFocusedTab="calc",historyPage=0,fitFrame=0;
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(lastToastTimer);lastToastTimer=setTimeout(()=>$("toast").classList.remove("show"),2300);}
 function billResult(bill,cfg){
  const fixed=cfg.fixedA+cfg.fixedB,variable=bill-fixed,variableA=Math.ceil(variable/2),variableB=variable-variableA,foodA=Math.ceil(cfg.food/2),foodB=cfg.food-foodA;
@@ -56,6 +56,30 @@ function commitMonth(){
  state.months[state.month]=doc;store(HISTORY,state.months);saveOld();renderHistory();renderCalc();toast(state.month.replace("-","年")+"月を登録したデス！");
  if(syncEngine)syncEngine.changed();
 }
+function fitActivePage(){
+ const page=document.querySelector(".page.active"),inner=page?.querySelector(".page-inner");
+ if(!page||!inner)return;
+ inner.style.width="100%";inner.style.transform="none";
+ const available=page.clientHeight-2;
+ if(available<=0)return;
+ const natural=inner.scrollHeight;
+ if(natural<=available)return;
+ let scale=Math.max(.05,Math.min(1,available/natural));
+ // 横幅を広げてから縮小すると、文字列が不自然に切れない。
+ for(let i=0;i<3;i++){
+  inner.style.width=(100/scale)+"%";
+  const height=inner.scrollHeight;
+  const next=Math.max(.05,Math.min(1,available/height));
+  if(Math.abs(next-scale)<.004){scale=next;break;}
+  scale=next;
+ }
+ inner.style.width=(100/scale)+"%";
+ inner.style.transform="scale("+scale+")";
+}
+function scheduleFit(){
+ if(fitFrame)return;
+ fitFrame=requestAnimationFrame(()=>{fitFrame=0;fitActivePage();});
+}
 function setTab(tab){
  if(!["calc","history","share","reminder"].includes(tab))return;
  lastFocusedTab=tab;
@@ -64,6 +88,7 @@ function setTab(tab){
  if(tab==="history")renderHistory();
  if(tab==="share")renderShare();
  if(tab==="reminder")renderReminder();
+ scheduleFit();
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 const input=$("billInput");
@@ -98,27 +123,47 @@ function historyRow(month,entry){
 function renderHistory(){
  const list=$("historyList");list.replaceChildren();
  const valid=Object.keys(state.months).filter(k=>validMonth(k)&&state.months[k]&&Number.isFinite(Number(state.months[k].bill))).sort().reverse();
- if(!valid.length){const empty=document.createElement("div");empty.className="empty";empty.textContent="まだ月別データがありません。「計算」から対象月を登録すると履歴が表示されます。";list.append(empty);}
- else valid.slice(0,24).forEach(m=>list.append(historyRow(m,state.months[m])));
+ const available=$("pages").clientHeight;
+ const perPage=available<460?2:available<590?3:4;
+ const totalPages=Math.max(1,Math.ceil(valid.length/perPage));
+ historyPage=Math.max(0,Math.min(totalPages-1,historyPage));
+ if(!valid.length){
+  const empty=document.createElement("div");empty.className="empty";
+  empty.textContent="まだ月別の記録がありません。計算タブで「この月を登録」を押してください。";
+  list.append(empty);
+ }else{
+  valid.slice(historyPage*perPage,(historyPage+1)*perPage).forEach(m=>list.append(historyRow(m,state.months[m])));
+ }
+ $("historyPageLabel").textContent=(historyPage+1)+" / "+totalPages;
+ $("historyPrev").disabled=historyPage===0||valid.length===0;
+ $("historyNext").disabled=historyPage>=totalPages-1||valid.length===0;
  const latest=valid[0];
  $("latestMonth").textContent=latest?latest.replace("-","/"):"—";
  if(latest){
   const [y,m]=latest.split("-").map(Number),d=new Date(y,m-2,1),prev=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-  if(state.months[prev]){const diff=money(state.months[latest].bill)-money(state.months[prev].bill);$("monthlyDelta").textContent=(diff>0?"+":"")+yen(diff);}
-  else $("monthlyDelta").textContent="比較なし";
+  if(state.months[prev]){
+   const diff=money(state.months[latest].bill)-money(state.months[prev].bill);
+   $("monthlyDelta").textContent=(diff>0?"+":"")+yen(diff);
+  }else $("monthlyDelta").textContent="比較なし";
  }else $("monthlyDelta").textContent="—";
  const series=monthsAgo(6),max=Math.max(1,...series.map(m=>money(state.months[m]?.bill||0)));
  const chart=$("chart");chart.replaceChildren();
+ const maxBar=Math.max(28,Math.min(94,(chart.clientHeight||113)-33));
  series.forEach(month=>{
   const value=state.months[month]?money(state.months[month].bill):null;
   const group=document.createElement("div");group.className="bar-group";
-  const amount=document.createElement("div");amount.className="bar-amount";amount.textContent=value===null?"—":(value>=10000?(Math.round(value/1000)/10)+"万":fmt(value));
-  const bar=document.createElement("div");bar.className="bar"+(value===null?" no-data":"");bar.style.height=(value===null?4:Math.max(5,Math.round(value/max*105)))+"px";
+  const amount=document.createElement("div");amount.className="bar-amount";
+  amount.textContent=value===null?"—":(value>=10000?(Math.round(value/1000)/10)+"万":fmt(value));
+  const bar=document.createElement("div");bar.className="bar"+(value===null?" no-data":"");
+  bar.style.height=(value===null?4:Math.max(5,Math.round(value/max*maxBar)))+"px";
   const label=document.createElement("div");label.className="bar-label";label.textContent=String(Number(month.slice(5)))+"月";
   group.append(amount,bar,label);chart.append(group);
  });
  chart.setAttribute("aria-label",series.map(m=>m+": "+(state.months[m]?yen(money(state.months[m].bill)):"未登録")).join("、"));
+ scheduleFit();
 }
+$("historyPrev").addEventListener("click",()=>{historyPage=Math.max(0,historyPage-1);renderHistory();});
+$("historyNext").addEventListener("click",()=>{historyPage++;renderHistory();});
 function modal(open){
  $("overlay").hidden=!open;$("settingsSheet").hidden=!open;$("settingsSheet").setAttribute("aria-hidden",String(!open));
  if(open){$("settingsA").value=fmt(state.settings.fixedA);$("settingsB").value=fmt(state.settings.fixedB);$("settingsFood").value=fmt(state.settings.food);refreshSettingTotal();$("closeSettings").focus();}
@@ -287,6 +332,10 @@ if(!window.YachinSync){
  }
 }
 renderBill();renderHistory();renderReminder();renderShare();checkReminder();
+window.addEventListener("resize",()=>{if(lastFocusedTab==="history")renderHistory();scheduleFit();});
+window.visualViewport?.addEventListener("resize",scheduleFit);
+document.fonts?.ready?.then(scheduleFit);
+scheduleFit();
 if(!initialInvite)statusPill(syncEngine?.getRoom()?"waiting":"local");
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});
 })();
