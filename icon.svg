@@ -1,7 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-<rect width="512" height="512" rx="120" fill="#234767"/>
-<rect x="72" y="110" width="368" height="298" rx="55" fill="#fff" opacity=".1"/>
-<path d="M112 212l144-105 144 105" fill="none" stroke="#dbe9f0" stroke-width="31" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M160 218v159h192V218" fill="#eaf2f5"/>
-<path d="M241 239v33h-45v25h45v16h-45v25h45v20h30v-20h44v-25h-44v-16h44v-25h-44v-33z" fill="#234767"/>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#59bbff"/><stop offset=".48" stop-color="#86caff"/><stop offset="1" stop-color="#ff78b9"/></linearGradient></defs>
+<rect width="512" height="512" rx="112" fill="url(#g)"/>
+<circle cx="105" cy="126" r="17" fill="white" opacity=".37"/><circle cx="400" cy="367" r="29" fill="white" opacity=".17"/>
+<path d="M103 245 Q100 233 111 224 L241 120 Q256 108 271 120 L402 224 Q414 233 409 250 L409 366 Q409 398 377 398 L135 398 Q103 398 103 366 Z" fill="#fff"/>
+<path d="M82 243 L239 112 Q256 98 273 112 L430 243" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M205 250 L256 296 L307 250" fill="none" stroke="#ff75b6" stroke-width="27" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M256 286 V369 M196 315 H316 M196 351 H316" fill="none" stroke="#569fea" stroke-width="25" stroke-linecap="round"/>
+<path d="M375 91 L384 113 L406 122 L384 131 L375 153 L366 131 L344 122 L366 113Z" fill="#fff"/>
 </svg>
