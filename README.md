@@ -24,7 +24,7 @@
 
 ## 公開と利用
 
-GitHub Pagesで公開する場合、Repository Settings → Pages → Build and deployment でGitHub Actionsを選択してください。`pages.yml`が公開処理を実行します。
+GitHub Pagesで公開するには、Repository **Settings → Pages → Build and deployment → Source: Deploy from a branch** と選び、**Branch: main / (root)** で **Save** してください。反映まで数分かかる場合があります。
 
 公開URL（GitHub Pages有効化後）: https://sprintershota01172-collab.github.io/Yachindesu/
 
