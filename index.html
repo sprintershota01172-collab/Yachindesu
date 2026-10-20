@@ -3,161 +3,132 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f5f6f8">
+  <meta name="theme-color" content="#88cdff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="家賃です。">
-  <meta name="description" content="楽天カードの請求額を入力するだけ。ふたりの振込額をその場で計算。">
+  <meta name="apple-mobile-web-app-title" content="家賃デス">
+  <meta name="description" content="楽天カードの請求額を入力するだけ。ふたりの振込額をその場で計算するデス！">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <title>家賃です。 | ふたりの家計精算</title>
+  <title>家賃デス | ふたりの家計精算</title>
   <style>
-    :root {
-      font-family: Meiryo, "メイリオ", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-      color: #17243a; background: #f5f6f8; font-synthesis: none;
-      -webkit-font-smoothing: antialiased;
-    }
-    * { box-sizing: border-box; }
-    html { min-height: 100%; -webkit-text-size-adjust: 100%; }
-    body { margin: 0; min-height: 100svh; background: #f5f6f8; }
-    button, input { font: inherit; }
-    button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
-    button:focus-visible, input:focus-visible { outline: 3px solid #8eafe0; outline-offset: 3px; }
-    .app { width: min(100%, 480px); margin: 0 auto; padding: calc(20px + env(safe-area-inset-top, 0px)) 18px calc(22px + env(safe-area-inset-bottom, 0px)); }
-    .top { display: flex; align-items: center; gap: 11px; margin-bottom: 22px; }
-    .mark { width: 41px; height: 41px; display: grid; place-items: center; border-radius: 14px; color: #fff; background: #213f65; font-weight: 800; font-size: 23px; flex-shrink: 0; }
-    .brand { min-width: 0; flex: 1; }
-    .brand strong { display: block; font-size: 18px; font-weight: 800; letter-spacing: -.05em; line-height: 1.35; }
-    .brand span { display: block; color: #7a8798; font-size: 10px; letter-spacing: .09em; margin-top: 2px; font-weight: 700; }
-    .round { border: 1px solid #e5e9ee; width: 42px; height: 42px; background: white; display: grid; place-items: center; border-radius: 13px; color: #425975; }
-    .round svg { width: 19px; height: 19px; }
-    .panel { background: #fff; border: 1px solid #edf0f2; box-shadow: 0 6px 24px rgba(30,50,75,.045); border-radius: 23px; }
-    .bill-card { padding: 22px 20px 19px; }
-    .eyebrow { margin: 0 0 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; letter-spacing: -.01em; }
-    .eyebrow .muted { font-weight: 500; font-size: 11px; color: #8d97a3; }
-    .bill-field { border-radius: 17px; border: 1.5px solid #dae3ea; height: 76px; display: flex; align-items: center; padding: 0 18px; transition: border .2s, box-shadow .2s; }
-    .bill-field:focus-within { border-color: #6e9ac5; box-shadow: 0 0 0 3px #edf5fc; }
-    .bill-field input { min-width: 0; flex: 1; width: 100%; border: 0; outline: 0; font-size: clamp(30px, 9vw, 39px); font-weight: 800; letter-spacing: -.05em; color: #152b46; background: transparent; font-variant-numeric: tabular-nums; }
-    .bill-field input:focus-visible { outline: 0; }
-    .bill-field input::placeholder { color: #c1cbd4; }
-    .bill-field .unit { color: #556b82; font-size: 20px; font-weight: 800; padding-left: 8px; }
-    .bill-hint { color: #8491a0; font-size: 11px; margin: 11px 1px 0; display: flex; gap: 7px; align-items: center; line-height: 1.5; }
-    .bill-hint svg { width: 14px; height: 14px; flex-shrink: 0; }
-    .section-title { margin: 25px 2px 11px; display: flex; align-items: center; justify-content: space-between; }
-    .section-title h2 { font-size: 14px; letter-spacing: -.04em; font-weight: 800; margin: 0; }
-    .section-title span { font-size: 10px; color: #6a8ca5; font-weight: 700; background: #e9f1f8; border-radius: 99px; padding: 5px 10px; }
-    .people { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 11px; }
-    .person { border-radius: 21px; padding: 17px 14px 16px; min-width: 0; position: relative; overflow: hidden; }
-    .person.a { background: #e9f0f7; color: #234465; }
-    .person.b { background: #eff2ec; color: #426447; }
-    .person-name { font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 7px; }
-    .person-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .7; flex-shrink: 0; }
-    .person-value { margin-top: 13px; font-size: clamp(22px, 6.2vw, 29px); font-weight: 800; letter-spacing: -.06em; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .person-value small { font-size: 13px; margin-left: 2px; letter-spacing: 0; }
-    .person-desc { font-size: 10px; opacity: .8; margin-top: 9px; }
-    .total { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; border-radius: 17px; color: #fff; background: #253f5c; padding: 15px 18px; gap: 12px; }
-    .total-label { font-size: 12px; font-weight: 800; }
-    .total-label span { display: block; margin-top: 4px; font-size: 10px; color: #b9c9da; font-weight: 500; }
-    .total-number { white-space: nowrap; font-size: 22px; letter-spacing: -.04em; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .total-number small { font-size: 12px; margin-left: 2px; }
-    .breakdown { padding: 18px 17px 15px; margin-top: 13px; }
-    .breakdown-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .breakdown-head h2 { font-size: 13px; margin: 0; letter-spacing: -.03em; }
-    .edit-inline { border: 0; background: transparent; color: #54799c; font-weight: 700; font-size: 11px; padding: 5px 1px 5px 8px; }
-    .table-head, .cost-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap: 6px; align-items: baseline; }
-    .table-head { color: #9aa5b1; font-size: 10px; margin-bottom: 6px; }
-    .table-head span:not(:first-child), .cost-row span:not(:first-child) { text-align: right; }
-    .cost-row { padding: 12px 0; border-bottom: 1px solid #f0f2f4; font-size: 12px; }
-    .cost-row:last-child { border-bottom: 0; padding-bottom: 3px; }
-    .cost-row .name { color: #66778b; font-size: 11px; }
-    .cost-row .number { font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.03em; white-space: nowrap; }
-    .breakdown-note { font-size: 10px; color: #8492a1; line-height: 1.6; margin-top: 13px; }
-    .warning { display: none; align-items: flex-start; gap: 8px; background: #fff4e4; color: #8b5f1d; border-radius: 12px; padding: 11px 13px; font-size: 11px; line-height: 1.6; margin-top: 12px; }
-    .warning.visible { display: flex; }
-    .actions { display: grid; grid-template-columns: 1fr; margin-top: 14px; }
-    .copy { border: none; border-radius: 15px; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 9px; background: #fff; border: 1px solid #d9e1e8; color: #2a4d70; font-weight: 800; font-size: 13px; }
-    .copy svg { width: 17px; height: 17px; }
-    .bottom-note { color: #9aa5b0; font-size: 10px; text-align: center; margin: 16px 0 0; line-height: 1.6; }
-    .overlay { position: fixed; inset: 0; background: rgba(14,30,48,.4); z-index: 5; opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; }
-    .overlay.show { opacity: 1; visibility: visible; }
-    .sheet { position: fixed; left: 0; right: 0; bottom: 0; margin: auto; z-index: 6; max-width: 480px; background: #fff; border-radius: 24px 24px 0 0; padding: 19px 22px calc(23px + env(safe-area-inset-bottom, 0px)); transform: translateY(105%); transition: transform .25s ease; max-height: min(92svh, 780px); overflow-y: auto; overscroll-behavior: contain; }
-    .sheet.show { transform: translateY(0); }
-    .sheet-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
-    .sheet-top h2 { font-size: 17px; margin: 0; }
-    .close { border: none; background: #f2f4f6; color: #4c5f75; border-radius: 10px; width: 33px; height: 33px; font-size: 23px; line-height: 1; }
-    .settings-desc { font-size: 11px; color: #8794a1; margin: 0 0 21px; line-height: 1.7; }
-    .field-label { display: block; margin-bottom: 8px; color: #334a62; font-weight: 800; font-size: 12px; }
-    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
-    .settings-field { margin-bottom: 18px; min-width: 0; }
-    .settings-input { border: 1px solid #dae1e7; border-radius: 12px; padding: 0 11px; height: 51px; display: flex; align-items: center; }
-    .settings-input input { width: 100%; min-width: 0; background: none; border: none; outline: 0; color: #203c58; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .settings-input small { font-size: 12px; color: #7b8b99; }
-    .settings-summary { display: flex; align-items: center; justify-content: space-between; background: #f5f7f9; padding: 15px; border-radius: 12px; font-size: 12px; margin-bottom: 20px; }
-    .settings-summary strong { font-size: 16px; }
-    .save { width: 100%; min-height: 54px; border-radius: 15px; border: 0; background: #234b73; color: white; font-size: 14px; font-weight: 800; }
-    .toast { position: fixed; z-index: 10; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%,15px); opacity: 0; pointer-events: none; background: #203e5f; color: white; border-radius: 100px; white-space: nowrap; font-size: 12px; padding: 12px 18px; transition: opacity .2s, transform .2s; }
-    .toast.show { opacity: 1; transform: translate(-50%,0); }
-    body.modal-open { overflow: hidden; }
-    @media (min-width: 700px) { .app { padding-top: 45px; } }
-    @media (max-width: 360px) { .app { padding-left: 13px; padding-right: 13px; } .person { padding-left: 11px; padding-right: 10px; } .person-value { font-size: 22px; } }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
-  </style>
+
+:root{font-family:"Hiragino Maru Gothic ProN","Arial Rounded MT Bold","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#29425c;background:#fbdff0;font-synthesis:none;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;-webkit-text-size-adjust:100%}
+body{height:100svh;overflow:hidden;background:radial-gradient(circle at 7% 3%,#dbf4ff 0%,transparent 30%),linear-gradient(140deg,#a4dfff,#ffcae4 78%);}
+button,input{font:inherit}
+button{-webkit-tap-highlight-color:transparent;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid #4da8ff;outline-offset:2px}
+.app{width:min(100%,450px);height:100svh;margin:auto;display:flex;flex-direction:column;gap:clamp(7px,1.35vh,12px);padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(9px + env(safe-area-inset-bottom,0px));overflow:hidden}
+.top{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:22px;background:rgba(255,255,255,.84);box-shadow:0 8px 23px #6286be16}
+.mark{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#56b6ff,#ff75bb);display:grid;place-items:center;flex-shrink:0;box-shadow:0 5px 11px #8c8bd045}
+.mark svg{width:31px;height:31px}
+.brand{flex:1;min-width:0}
+.brand strong{display:block;white-space:nowrap;font-size:clamp(22px,6.5vw,28px);line-height:1.1;font-weight:900;letter-spacing:-.055em;color:#2c4e77}
+.brand strong em{font-style:normal;color:#ff68a8;display:inline-block;transform:rotate(-5deg)}
+.brand span{display:block;margin-top:5px;font-size:10px;font-weight:800;color:#8392a8;white-space:nowrap}
+.round{width:39px;height:39px;flex-shrink:0;display:grid;place-items:center;border:none;border-radius:14px;background:#fff;color:#647fa5;box-shadow:inset 0 0 0 1px #e6eef6}
+.round svg{height:20px;width:20px}
+.panel{background:rgba(255,255,255,.88);border-radius:22px;box-shadow:0 9px 25px #6788b01d}
+.bill-card{flex-shrink:0;padding:14px 14px 12px}
+.eyebrow{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 0 9px;color:#365675;font-weight:900;font-size:13px}
+.eyebrow .muted{padding:4px 8px;border-radius:99px;color:#fff;font-size:10px;white-space:nowrap;background:linear-gradient(100deg,#59b5ff,#f779bb);letter-spacing:0}
+.bill-field{border-radius:17px;background:#fff;border:2px solid #e6ecf6;display:flex;align-items:center;height:clamp(53px,8.7vh,68px);padding:0 13px;transition:border .18s}
+.bill-field:focus-within{border-color:#7bc7ff}
+.bill-field input{min-width:0;width:100%;flex:1;background:transparent;border:0;outline:0;font-size:clamp(30px,8vw,37px);font-weight:900;color:#29465f;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.bill-field input:focus-visible{outline:0}
+.bill-field input::placeholder{color:#c3cfdf}
+.bill-field .unit{font-size:17px;font-weight:900;color:#5c7898}
+.bill-hint{margin:7px 1px 0;font-size:10px;font-weight:700;line-height:1.25;color:#8497ab}
+.section-title{margin:1px 3px -2px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.section-title h2{font-size:13px;margin:0;color:#304c6a;font-weight:900}
+.section-title span{font-size:10px;font-weight:900;color:#f65c9d;background:#fff5fb;border-radius:99px;padding:4px 8px}
+.people{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;flex-shrink:0}
+.person{min-width:0;overflow:hidden;border-radius:20px;padding:clamp(10px,1.9vh,15px) 12px;box-shadow:0 5px 15px #779bc527;color:#fff}
+.person.a{background:linear-gradient(135deg,#64bdfd,#4c99f3)}
+.person.b{background:linear-gradient(135deg,#ff77b0,#f491c6)}
+.person-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900}
+.person-dot{width:7px;height:7px;background:#fff;border-radius:50%;flex-shrink:0}
+.person-value{white-space:nowrap;margin-top:8px;font-size:clamp(23px,6.5vw,30px);letter-spacing:-.055em;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.2}
+.person-value small{font-size:12px;margin-left:2px;letter-spacing:0}
+.person-desc{font-size:10px;font-weight:700;margin-top:6px;opacity:.92;white-space:nowrap}
+.total{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;gap:8px;border-radius:18px;padding:12px 14px;background:rgba(255,255,255,.94);box-shadow:0 5px 15px #7398bb22}
+.total-label{font-size:12px;font-weight:900;color:#3e5b77}
+.total-label span{display:block;margin-top:3px;font-size:9px;color:#8b9aae;font-weight:700}
+.total-number{font-size:clamp(21px,6vw,26px);font-weight:900;color:#2c4b6b;white-space:nowrap;font-variant-numeric:tabular-nums}
+.total-number small{font-size:12px;margin-left:2px}
+.mini{flex-shrink:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.mini-card{min-width:0;padding:9px 4px 10px;text-align:center;border-radius:15px;background:rgba(255,255,255,.89);box-shadow:inset 0 0 0 1px #fff}
+.mini-card .k{font-size:10px;font-weight:900;color:#8190a6}
+.mini-card .v{margin-top:6px;white-space:nowrap;font-size:clamp(11px,3.4vw,15px);letter-spacing:-.035em;font-weight:900;font-variant-numeric:tabular-nums;color:#345571}
+.warning{display:none;flex-shrink:0;border-radius:11px;padding:8px 11px;background:#fff3dc;color:#8a601f;font-size:10px;line-height:1.45}
+.warning.visible{display:block}
+.actions{flex-shrink:0;display:grid;grid-template-columns:1.3fr 1fr;gap:9px}
+.copy,.edit-inline{min-height:clamp(43px,7vh,50px);border:0;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:900;white-space:nowrap}
+.copy{color:white;background:linear-gradient(110deg,#59b2ff,#ed71bd);box-shadow:0 6px 14px #b179ae37}
+.edit-inline{background:white;color:#527296}
+.copy svg{width:16px;height:16px}
+.bottom-note{font-size:9px;font-weight:700;color:#73869d;line-height:1.3;margin:0;text-align:center}
+.overlay{position:fixed;inset:0;z-index:5;opacity:0;visibility:hidden;background:#1e36557a;transition:opacity .2s,visibility .2s}
+.overlay.show{opacity:1;visibility:visible}
+.sheet{position:fixed;z-index:6;bottom:0;left:0;right:0;margin:auto;max-width:450px;max-height:min(90svh,720px);overflow-y:auto;overscroll-behavior:contain;padding:17px 17px calc(20px + env(safe-area-inset-bottom,0px));border-radius:26px 26px 0 0;background:#fff;box-shadow:0 -8px 30px #314d8130;transform:translateY(105%);transition:transform .24s}
+.sheet.show{transform:translateY(0)}
+.sheet-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.sheet-top h2{margin:0;color:#3c5976;font-size:19px;font-weight:900}
+.close{height:34px;width:34px;border:0;border-radius:10px;background:#f4f6fb;color:#4a6786;font-size:23px}
+.settings-desc{font-size:11px;color:#8192a6;font-weight:700;line-height:1.6;margin:0 0 15px}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.settings-field{min-width:0;margin-bottom:13px}
+.field-label{display:block;font-size:11px;font-weight:900;color:#466681;margin-bottom:6px}
+.settings-input{border:1px solid #e5ecf6;border-radius:13px;height:48px;display:flex;align-items:center;padding:0 11px;background:#fbfcff}
+.settings-input input{flex:1;min-width:0;width:100%;font-size:18px;font-weight:900;color:#2b5072;outline:0;border:0;background:none;font-variant-numeric:tabular-nums}
+.settings-input small{font-size:11px;color:#7891a7}
+.settings-summary{display:flex;justify-content:space-between;align-items:center;border-radius:12px;padding:10px 13px;background:#f5f8fc;font-size:12px;margin-bottom:13px}
+.settings-summary strong{font-size:17px}
+.save{width:100%;height:49px;border:0;border-radius:15px;color:#fff;font-weight:900;background:linear-gradient(110deg,#5ab2fe,#fa7ab5)}
+.breakdown-note{margin:9px 0 0;font-size:10px;line-height:1.5;color:#7c90a4}
+.toast{position:fixed;z-index:10;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);opacity:0;pointer-events:none;border-radius:99px;background:#304b69;color:white;font-size:12px;padding:12px 18px;white-space:nowrap;transition:all .18s}
+.toast.show{transform:translate(-50%,0);opacity:1}
+body.modal-open{overflow:hidden}
+@media (max-height:710px){.app{gap:7px;padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}.top{padding:8px 10px}.mark{height:42px;width:42px}.bill-card{padding:10px 12px}.bill-hint{margin-top:5px}.person{padding:9px 10px}.person-value{margin-top:5px}.person-desc{margin-top:3px}.mini-card{padding:7px 3px}.total{padding:9px 12px}.section-title{margin:0 2px}}
+@media(max-height:610px){.brand span,.bill-hint,.bottom-note{display:none}.app{gap:5px}.bill-card{padding:7px 11px}.bill-field{height:48px}.person{padding:7px 10px}.mini-card{padding:6px 3px}.person-desc{font-size:9px}.person-value{font-size:23px}}
+@media(max-width:350px){.app{padding-left:10px;padding-right:10px}.person{padding-left:8px;padding-right:7px}.person-value{font-size:22px}.brand strong{font-size:23px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+
+</style>
 </head>
 <body>
   <main class="app">
-    <header class="top">
-      <div class="mark" aria-hidden="true">¥</div>
-      <div class="brand"><strong>家賃です。</strong><span>ふたりの家計精算</span></div>
-      <button class="round" type="button" id="openSettings" aria-label="家計の設定を開く" title="設定">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.6" fill="white"/><circle cx="16" cy="17" r="2.6" fill="white"/></svg>
-      </button>
-    </header>
-
-    <section class="panel bill-card" aria-label="カード請求額">
-      <label class="eyebrow" for="billInput"><span>楽天カードの請求額</span><span class="muted">ここだけ入力</span></label>
-      <div class="bill-field">
-        <input id="billInput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-label="楽天カードの請求額、円" placeholder="0">
-        <span class="unit">円</span>
-      </div>
-      <p class="bill-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M4 12l5 5 4-4 7-7"/></svg>入力すると、ふたりの振込額を自動計算します</p>
-    </section>
-
-    <div class="section-title"><h2>今月の振込額</h2><span>自動計算</span></div>
-    <section class="people" aria-label="それぞれの振込額" aria-live="polite">
-      <div class="person a">
-        <div class="person-name"><span class="person-dot"></span>翔太</div>
-        <div class="person-value"><span id="personA">90,000</span><small>円</small></div>
-        <div class="person-desc">固定費 ＋ 変動費 ＋ 食費</div>
-      </div>
-      <div class="person b">
-        <div class="person-name"><span class="person-dot"></span>志穂</div>
-        <div class="person-value"><span id="personB">70,000</span><small>円</small></div>
-        <div class="person-desc">固定費 ＋ 変動費 ＋ 食費</div>
-      </div>
-    </section>
-
-    <section class="total" aria-label="振込合計">
-      <div class="total-label">振込合計<span>楽天カード ＋ 食費チャージ</span></div>
-      <div class="total-number"><span id="totalAmount">160,000</span><small>円</small></div>
-    </section>
-    <div id="warning" class="warning" role="status">カード請求額が固定費より少なくなっています。請求額・設定を確認してください。</div>
-
-    <section class="panel breakdown" aria-label="内訳">
-      <div class="breakdown-head"><h2>計算の内訳</h2><button class="edit-inline" type="button" id="editSettings">設定を変更 ›</button></div>
-      <div class="table-head"><span>項目</span><span>翔太</span><span>志穂</span></div>
-      <div class="cost-row"><span class="name">固定費</span><span class="number" id="fixedA">61,000円</span><span class="number" id="fixedB">41,000円</span></div>
-      <div class="cost-row"><span class="name">変動費（折半）</span><span class="number" id="variableA">15,000円</span><span class="number" id="variableB">15,000円</span></div>
-      <div class="cost-row"><span class="name">食費チャージ</span><span class="number" id="foodA">14,000円</span><span class="number" id="foodB">14,000円</span></div>
-      <p class="breakdown-note">固定費 <b id="fixedTotal">102,000円</b>をカード請求から引き、残りの変動費を折半。食費はカード請求とは別に加算しています。</p>
-    </section>
-
-    <div class="actions"><button id="copyButton" class="copy" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
-      振込額をコピーする
-    </button></div>
-    <p class="bottom-note">設定と請求額はこの端末に保存されます。<br>サーバーへの送信やログインは不要です。</p>
-  </main>
+  <header class="top">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M8 29 32 10 56 29V53H8V29Z" fill="white"/><path d="M22 30 32 40 42 30M32 40v10M21 43h22" stroke="#fc78b8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="brand"><strong>家賃<em>デス</em></strong><span>ふたりの家計を、パッと精算！</span></div>
+    <button class="round" type="button" id="openSettings" aria-label="設定を開く"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="white"/><circle cx="16" cy="17" r="3" fill="white"/></svg></button>
+  </header>
+  <section class="panel bill-card" aria-label="楽天カードの請求額">
+    <label class="eyebrow" for="billInput"><span>楽天カードの請求額</span><span class="muted">ここだけ入力！</span></label>
+    <div class="bill-field"><input id="billInput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-label="楽天カードの請求額、円" placeholder="0"><span class="unit">円</span></div>
+    <p class="bill-hint">数字を変えるだけで、自動で計算するデス！</p>
+  </section>
+  <div class="section-title"><h2>ふたりの振込額</h2><span>自動計算</span></div>
+  <section class="people" aria-label="それぞれの振込額" aria-live="polite">
+    <div class="person a"><div class="person-name"><span class="person-dot"></span>翔太</div><div class="person-value"><span id="personA">90,000</span><small>円</small></div><div class="person-desc">固定費＋変動費＋食費</div></div>
+    <div class="person b"><div class="person-name"><span class="person-dot"></span>志穂</div><div class="person-value"><span id="personB">70,000</span><small>円</small></div><div class="person-desc">固定費＋変動費＋食費</div></div>
+  </section>
+  <section class="total" aria-label="振込合計"><div class="total-label">振込合計<span>カード請求 ＋ 食費チャージ</span></div><div class="total-number"><span id="totalAmount">160,000</span><small>円</small></div></section>
+  <section class="mini" aria-label="計算の内訳">
+    <div class="mini-card"><div class="k">固定費 合計</div><div class="v" id="fixedTotal">102,000円</div></div>
+    <div class="mini-card"><div class="k">変動費 1人分</div><div class="v" id="variableEach">15,000円</div></div>
+    <div class="mini-card"><div class="k">食費 1人分</div><div class="v" id="foodEach">14,000円</div></div>
+  </section>
+  <div id="warning" class="warning" role="status">請求額が固定費より少ないため、計算結果を確認してください。</div>
+  <div class="actions">
+    <button id="copyButton" class="copy" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>振込額をコピー</button>
+    <button id="editSettings" class="edit-inline" type="button">設定を変更 ›</button>
+  </div>
+  <p class="bottom-note">入力額と設定は、この端末に自動保存されます。</p>
+</main>
 
   <div id="overlay" class="overlay" aria-hidden="true"></div>
   <section id="settingsSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
@@ -175,145 +146,107 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
-    (function () {
-      "use strict";
-      var KEY = "yachindesu-v1";
-      var defaults = { bill: 132000, fixedA: 61000, fixedB: 41000, food: 28000 };
-      var state = Object.assign({}, defaults);
-      var el = function (id) { return document.getElementById(id); };
-      var format = function (value) { return Number(value).toLocaleString("ja-JP"); };
-      var yen = function (value) { return format(value) + "円"; };
-      var digits = function (value) {
-        var normalized = String(value).replace(/[０-９]/g, function(c) { return String.fromCharCode(c.charCodeAt(0) - 65248); });
-        return normalized.replace(/[^0-9]/g, "").slice(0, 10);
-      };
-      var parse = function (value) { return Number(digits(value)) || 0; };
-      var val = function (n) { return Math.max(0, Math.min(9999999999, Math.floor(Number(n) || 0))); };
-      function load() {
-        try {
-          var saved = JSON.parse(localStorage.getItem(KEY) || "null");
-          if (saved && typeof saved === "object") {
-            ["bill", "fixedA", "fixedB", "food"].forEach(function(key) {
-              if (saved[key] !== undefined && Number.isFinite(Number(saved[key]))) state[key] = val(saved[key]);
-            });
-          }
-        } catch (e) { /* storage may be unavailable */ }
-      }
-      function persist() {
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
-      }
-      function calculate() {
-        var fixed = state.fixedA + state.fixedB;
-        var variable = state.bill - fixed;
-        var variableA = Math.ceil(variable / 2);
-        var variableB = variable - variableA;
-        var foodA = Math.ceil(state.food / 2);
-        var foodB = state.food - foodA;
-        return {
-          fixed: fixed, variable: variable, variableA: variableA, variableB: variableB,
-          foodA: foodA, foodB: foodB,
-          a: state.fixedA + variableA + foodA,
-          b: state.fixedB + variableB + foodB,
-          total: state.bill + state.food
-        };
-      }
-      function render() {
-        var r = calculate();
-        el("personA").textContent = format(r.a);
-        el("personB").textContent = format(r.b);
-        el("totalAmount").textContent = format(r.total);
-        el("fixedA").textContent = yen(state.fixedA);
-        el("fixedB").textContent = yen(state.fixedB);
-        el("variableA").textContent = yen(r.variableA);
-        el("variableB").textContent = yen(r.variableB);
-        el("foodA").textContent = yen(r.foodA);
-        el("foodB").textContent = yen(r.foodB);
-        el("fixedTotal").textContent = yen(r.fixed);
-        el("warning").classList.toggle("visible", state.bill < r.fixed);
-      }
-      function inputCurrency(input) {
-        input.addEventListener("focus", function() { input.value = String(parse(input.value)); });
-        input.addEventListener("blur", function() { input.value = format(parse(input.value)); });
-      }
-      function openSheet() {
-        ["A","B","Food"].forEach(function(key) {
-          el("settings" + key).value = format(state[key === "Food" ? "food" : "fixed" + key]);
-        });
-        refreshSettingsTotal();
-        el("overlay").classList.add("show");
-        el("settingsSheet").classList.add("show");
-        el("settingsSheet").setAttribute("aria-hidden", "false");
-        document.body.classList.add("modal-open");
-        el("closeSettings").focus();
-      }
-      function closeSheet() {
-        el("overlay").classList.remove("show");
-        el("settingsSheet").classList.remove("show");
-        el("settingsSheet").setAttribute("aria-hidden", "true");
-        document.body.classList.remove("modal-open");
-        el("openSettings").focus();
-      }
-      function refreshSettingsTotal() {
-        el("settingsTotal").textContent = yen(parse(el("settingsA").value) + parse(el("settingsB").value));
-      }
-      var toastTimeout;
-      function toast(message) {
-        el("toast").textContent = message;
-        el("toast").classList.add("show");
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(function () { el("toast").classList.remove("show"); }, 2400);
-      }
-      function copyText(text) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          return navigator.clipboard.writeText(text);
-        }
-        return new Promise(function(resolve, reject) {
-          var t = document.createElement("textarea");
-          t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
-          document.body.appendChild(t); t.focus(); t.select();
-          var ok = document.execCommand("copy");
-          document.body.removeChild(t);
-          if (ok) resolve(); else reject(new Error("copy failed"));
-        });
-      }
-      load();
-      el("billInput").value = format(state.bill);
-      inputCurrency(el("billInput"));
-      el("billInput").addEventListener("input", function() {
-        var current = digits(this.value);
-        state.bill = val(current);
-        persist(); render();
-      });
-      el("billInput").addEventListener("blur", function() {
-        this.value = format(state.bill);
-      });
-      ["A", "B", "Food"].forEach(function(key) {
-        var input = el("settings" + key);
-        inputCurrency(input);
-        input.addEventListener("input", refreshSettingsTotal);
-      });
-      el("openSettings").addEventListener("click", openSheet);
-      el("editSettings").addEventListener("click", openSheet);
-      el("closeSettings").addEventListener("click", closeSheet);
-      el("overlay").addEventListener("click", closeSheet);
-      document.addEventListener("keydown", function(e) { if (e.key === "Escape" && el("settingsSheet").classList.contains("show")) closeSheet(); });
-      el("saveSettings").addEventListener("click", function() {
-        state.fixedA = val(parse(el("settingsA").value));
-        state.fixedB = val(parse(el("settingsB").value));
-        state.food = val(parse(el("settingsFood").value));
-        persist(); render(); closeSheet(); toast("設定を保存しました");
-      });
-      el("copyButton").addEventListener("click", function() {
-        var r = calculate();
-        var message = "【今月の家計振込】\n翔太：" + yen(r.a) + "\n志穂：" + yen(r.b) + "\n合計：" + yen(r.total) +
-          "\n（楽天カード：" + yen(state.bill) + " ＋ 食費：" + yen(state.food) + "）";
-        copyText(message).then(function() { toast("振込額をコピーしました"); }).catch(function() { toast("コピーできませんでした"); });
-      });
-      render();
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function() { navigator.serviceWorker.register("./sw.js").catch(function() {}); });
-      }
-    })();
-  </script>
+(function() {
+"use strict";
+var KEY="yachindesu-v1";
+var defaults={bill:132000,fixedA:61000,fixedB:41000,food:28000};
+var state=Object.assign({},defaults);
+function el(id){return document.getElementById(id);}
+function format(n){return Number(n).toLocaleString("ja-JP");}
+function yen(n){return format(n)+"円";}
+function digits(v){return String(v).replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248);}).replace(/[^0-9]/g,"").slice(0,10);}
+function num(v){return Number(digits(v))||0;}
+function clamp(v){return Math.max(0,Math.min(9999999999,Math.floor(Number(v)||0)));}
+try{var saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved&&typeof saved==="object"){Object.keys(defaults).forEach(function(k){if(saved[k]!==undefined&&Number.isFinite(Number(saved[k])))state[k]=clamp(saved[k]);});}}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function calc(){
+  var f=state.fixedA+state.fixedB,variable=state.bill-f;
+  var va=Math.ceil(variable/2),vb=variable-va;
+  var fa=Math.ceil(state.food/2),fb=state.food-fa;
+  return {fixed:f,va:va,vb:vb,fa:fa,fb:fb,a:state.fixedA+va+fa,b:state.fixedB+vb+fb,total:state.bill+state.food};
+}
+function splitText(a,b){return a===b?yen(a):format(a)+" / "+yen(b);}
+function render(){
+  var r=calc();
+  el("personA").textContent=format(r.a);
+  el("personB").textContent=format(r.b);
+  el("totalAmount").textContent=format(r.total);
+  el("fixedTotal").textContent=yen(r.fixed);
+  el("variableEach").textContent=splitText(r.va,r.vb);
+  el("foodEach").textContent=splitText(r.fa,r.fb);
+  el("warning").classList.toggle("visible",state.bill<r.fixed);
+}
+var bill=el("billInput");
+bill.value=state.bill?format(state.bill):"";
+bill.addEventListener("focus",function(){
+  // 全選択するので入力開始時に古い金額や先頭の0が残らない
+  bill.value=state.bill?String(state.bill):"";
+  if(bill.value)bill.select();
+});
+bill.addEventListener("input",function(){
+  var raw=digits(bill.value).replace(/^0+(?=\d)/,"");
+  if(raw==="0")raw="";
+  bill.value=raw;
+  state.bill=clamp(raw);
+  persist();render();
+});
+bill.addEventListener("blur",function(){bill.value=state.bill?format(state.bill):"";});
+function settingInput(id){
+  var inp=el(id);
+  inp.addEventListener("focus",function(){inp.value=String(num(inp.value));inp.select();});
+  inp.addEventListener("blur",function(){inp.value=format(num(inp.value));});
+}
+["settingsA","settingsB","settingsFood"].forEach(settingInput);
+function settingsTotal(){el("settingsTotal").textContent=yen(num(el("settingsA").value)+num(el("settingsB").value));}
+["settingsA","settingsB"].forEach(function(id){el(id).addEventListener("input",settingsTotal);});
+function openSettings(){
+  el("settingsA").value=format(state.fixedA);
+  el("settingsB").value=format(state.fixedB);
+  el("settingsFood").value=format(state.food);
+  settingsTotal();
+  el("overlay").classList.add("show");
+  el("settingsSheet").classList.add("show");
+  el("settingsSheet").setAttribute("aria-hidden","false");
+  document.body.classList.add("modal-open");
+  el("closeSettings").focus();
+}
+function closeSettings(){
+  el("overlay").classList.remove("show");
+  el("settingsSheet").classList.remove("show");
+  el("settingsSheet").setAttribute("aria-hidden","true");
+  document.body.classList.remove("modal-open");
+  el("openSettings").focus();
+}
+el("openSettings").addEventListener("click",openSettings);
+el("editSettings").addEventListener("click",openSettings);
+el("closeSettings").addEventListener("click",closeSettings);
+el("overlay").addEventListener("click",closeSettings);
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&el("settingsSheet").classList.contains("show"))closeSettings();});
+var toastTimeout;
+function toast(message){el("toast").textContent=message;el("toast").classList.add("show");clearTimeout(toastTimeout);toastTimeout=setTimeout(function(){el("toast").classList.remove("show");},2000);}
+el("saveSettings").addEventListener("click",function(){
+  state.fixedA=clamp(num(el("settingsA").value));
+  state.fixedB=clamp(num(el("settingsB").value));
+  state.food=clamp(num(el("settingsFood").value));
+  persist();render();closeSettings();toast("設定を保存したデス！");
+});
+function copyText(value){
+  if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(value);
+  return new Promise(function(resolve,reject){
+    var t=document.createElement("textarea");
+    t.value=value;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.focus();t.select();
+    var ok=document.execCommand("copy");document.body.removeChild(t);
+    ok?resolve():reject(new Error("copy failed"));
+  });
+}
+el("copyButton").addEventListener("click",function(){
+  var r=calc();
+  var s="【家賃デス】\n翔太："+yen(r.a)+"\n志穂："+yen(r.b)+"\n合計："+yen(r.total)+"\n（楽天カード："+yen(state.bill)+" ＋ 食費："+yen(state.food)+"）";
+  copyText(s).then(function(){toast("コピーできたデス！");}).catch(function(){toast("コピーできませんでした");});
+});
+render();
+if("serviceWorker" in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){});});
+})();
+</script>
 </body>
 </html>
