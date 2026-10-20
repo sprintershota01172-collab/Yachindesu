@@ -1,252 +1,111 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#88cdff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="家賃デス">
-  <meta name="description" content="楽天カードの請求額を入力するだけ。ふたりの振込額をその場で計算するデス！">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <title>家賃デス | ふたりの家計精算</title>
-  <style>
-
-:root{font-family:"Hiragino Maru Gothic ProN","Arial Rounded MT Bold","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#29425c;background:#fbdff0;font-synthesis:none;-webkit-font-smoothing:antialiased}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;-webkit-text-size-adjust:100%}
-body{height:100svh;overflow:hidden;background:radial-gradient(circle at 7% 3%,#dbf4ff 0%,transparent 30%),linear-gradient(140deg,#a4dfff,#ffcae4 78%);}
-button,input{font:inherit}
-button{-webkit-tap-highlight-color:transparent;cursor:pointer}
-button:focus-visible,input:focus-visible{outline:3px solid #4da8ff;outline-offset:2px}
-.app{width:min(100%,450px);height:100svh;margin:auto;display:flex;flex-direction:column;gap:clamp(7px,1.35vh,12px);padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(9px + env(safe-area-inset-bottom,0px));overflow:hidden}
-.top{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:22px;background:rgba(255,255,255,.84);box-shadow:0 8px 23px #6286be16}
-.mark{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#56b6ff,#ff75bb);display:grid;place-items:center;flex-shrink:0;box-shadow:0 5px 11px #8c8bd045}
-.mark svg{width:31px;height:31px}
-.brand{flex:1;min-width:0}
-.brand strong{display:block;white-space:nowrap;font-size:clamp(22px,6.5vw,28px);line-height:1.1;font-weight:900;letter-spacing:-.055em;color:#2c4e77}
-.brand strong em{font-style:normal;color:#ff68a8;display:inline-block;transform:rotate(-5deg)}
-.brand span{display:block;margin-top:5px;font-size:10px;font-weight:800;color:#8392a8;white-space:nowrap}
-.round{width:39px;height:39px;flex-shrink:0;display:grid;place-items:center;border:none;border-radius:14px;background:#fff;color:#647fa5;box-shadow:inset 0 0 0 1px #e6eef6}
-.round svg{height:20px;width:20px}
-.panel{background:rgba(255,255,255,.88);border-radius:22px;box-shadow:0 9px 25px #6788b01d}
-.bill-card{flex-shrink:0;padding:14px 14px 12px}
-.eyebrow{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 0 9px;color:#365675;font-weight:900;font-size:13px}
-.eyebrow .muted{padding:4px 8px;border-radius:99px;color:#fff;font-size:10px;white-space:nowrap;background:linear-gradient(100deg,#59b5ff,#f779bb);letter-spacing:0}
-.bill-field{border-radius:17px;background:#fff;border:2px solid #e6ecf6;display:flex;align-items:center;height:clamp(53px,8.7vh,68px);padding:0 13px;transition:border .18s}
-.bill-field:focus-within{border-color:#7bc7ff}
-.bill-field input{min-width:0;width:100%;flex:1;background:transparent;border:0;outline:0;font-size:clamp(30px,8vw,37px);font-weight:900;color:#29465f;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
-.bill-field input:focus-visible{outline:0}
-.bill-field input::placeholder{color:#c3cfdf}
-.bill-field .unit{font-size:17px;font-weight:900;color:#5c7898}
-.bill-hint{margin:7px 1px 0;font-size:10px;font-weight:700;line-height:1.25;color:#8497ab}
-.section-title{margin:1px 3px -2px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.section-title h2{font-size:13px;margin:0;color:#304c6a;font-weight:900}
-.section-title span{font-size:10px;font-weight:900;color:#f65c9d;background:#fff5fb;border-radius:99px;padding:4px 8px}
-.people{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;flex-shrink:0}
-.person{min-width:0;overflow:hidden;border-radius:20px;padding:clamp(10px,1.9vh,15px) 12px;box-shadow:0 5px 15px #779bc527;color:#fff}
-.person.a{background:linear-gradient(135deg,#64bdfd,#4c99f3)}
-.person.b{background:linear-gradient(135deg,#ff77b0,#f491c6)}
-.person-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900}
-.person-dot{width:7px;height:7px;background:#fff;border-radius:50%;flex-shrink:0}
-.person-value{white-space:nowrap;margin-top:8px;font-size:clamp(23px,6.5vw,30px);letter-spacing:-.055em;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.2}
-.person-value small{font-size:12px;margin-left:2px;letter-spacing:0}
-.person-desc{font-size:10px;font-weight:700;margin-top:6px;opacity:.92;white-space:nowrap}
-.total{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;gap:8px;border-radius:18px;padding:12px 14px;background:rgba(255,255,255,.94);box-shadow:0 5px 15px #7398bb22}
-.total-label{font-size:12px;font-weight:900;color:#3e5b77}
-.total-label span{display:block;margin-top:3px;font-size:9px;color:#8b9aae;font-weight:700}
-.total-number{font-size:clamp(21px,6vw,26px);font-weight:900;color:#2c4b6b;white-space:nowrap;font-variant-numeric:tabular-nums}
-.total-number small{font-size:12px;margin-left:2px}
-.mini{flex-shrink:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-.mini-card{min-width:0;padding:9px 4px 10px;text-align:center;border-radius:15px;background:rgba(255,255,255,.89);box-shadow:inset 0 0 0 1px #fff}
-.mini-card .k{font-size:10px;font-weight:900;color:#8190a6}
-.mini-card .v{margin-top:6px;white-space:nowrap;font-size:clamp(11px,3.4vw,15px);letter-spacing:-.035em;font-weight:900;font-variant-numeric:tabular-nums;color:#345571}
-.warning{display:none;flex-shrink:0;border-radius:11px;padding:8px 11px;background:#fff3dc;color:#8a601f;font-size:10px;line-height:1.45}
-.warning.visible{display:block}
-.actions{flex-shrink:0;display:grid;grid-template-columns:1.3fr 1fr;gap:9px}
-.copy,.edit-inline{min-height:clamp(43px,7vh,50px);border:0;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:900;white-space:nowrap}
-.copy{color:white;background:linear-gradient(110deg,#59b2ff,#ed71bd);box-shadow:0 6px 14px #b179ae37}
-.edit-inline{background:white;color:#527296}
-.copy svg{width:16px;height:16px}
-.bottom-note{font-size:9px;font-weight:700;color:#73869d;line-height:1.3;margin:0;text-align:center}
-.overlay{position:fixed;inset:0;z-index:5;opacity:0;visibility:hidden;background:#1e36557a;transition:opacity .2s,visibility .2s}
-.overlay.show{opacity:1;visibility:visible}
-.sheet{position:fixed;z-index:6;bottom:0;left:0;right:0;margin:auto;max-width:450px;max-height:min(90svh,720px);overflow-y:auto;overscroll-behavior:contain;padding:17px 17px calc(20px + env(safe-area-inset-bottom,0px));border-radius:26px 26px 0 0;background:#fff;box-shadow:0 -8px 30px #314d8130;transform:translateY(105%);transition:transform .24s}
-.sheet.show{transform:translateY(0)}
-.sheet-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-.sheet-top h2{margin:0;color:#3c5976;font-size:19px;font-weight:900}
-.close{height:34px;width:34px;border:0;border-radius:10px;background:#f4f6fb;color:#4a6786;font-size:23px}
-.settings-desc{font-size:11px;color:#8192a6;font-weight:700;line-height:1.6;margin:0 0 15px}
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.settings-field{min-width:0;margin-bottom:13px}
-.field-label{display:block;font-size:11px;font-weight:900;color:#466681;margin-bottom:6px}
-.settings-input{border:1px solid #e5ecf6;border-radius:13px;height:48px;display:flex;align-items:center;padding:0 11px;background:#fbfcff}
-.settings-input input{flex:1;min-width:0;width:100%;font-size:18px;font-weight:900;color:#2b5072;outline:0;border:0;background:none;font-variant-numeric:tabular-nums}
-.settings-input small{font-size:11px;color:#7891a7}
-.settings-summary{display:flex;justify-content:space-between;align-items:center;border-radius:12px;padding:10px 13px;background:#f5f8fc;font-size:12px;margin-bottom:13px}
-.settings-summary strong{font-size:17px}
-.save{width:100%;height:49px;border:0;border-radius:15px;color:#fff;font-weight:900;background:linear-gradient(110deg,#5ab2fe,#fa7ab5)}
-.breakdown-note{margin:9px 0 0;font-size:10px;line-height:1.5;color:#7c90a4}
-.toast{position:fixed;z-index:10;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);opacity:0;pointer-events:none;border-radius:99px;background:#304b69;color:white;font-size:12px;padding:12px 18px;white-space:nowrap;transition:all .18s}
-.toast.show{transform:translate(-50%,0);opacity:1}
-body.modal-open{overflow:hidden}
-@media (max-height:710px){.app{gap:7px;padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}.top{padding:8px 10px}.mark{height:42px;width:42px}.bill-card{padding:10px 12px}.bill-hint{margin-top:5px}.person{padding:9px 10px}.person-value{margin-top:5px}.person-desc{margin-top:3px}.mini-card{padding:7px 3px}.total{padding:9px 12px}.section-title{margin:0 2px}}
-@media(max-height:610px){.brand span,.bill-hint,.bottom-note{display:none}.app{gap:5px}.bill-card{padding:7px 11px}.bill-field{height:48px}.person{padding:7px 10px}.mini-card{padding:6px 3px}.person-desc{font-size:9px}.person-value{font-size:23px}}
-@media(max-width:350px){.app{padding-left:10px;padding-right:10px}.person{padding-left:8px;padding-right:7px}.person-value{font-size:22px}.brand strong{font-size:23px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
-
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#a0dcff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="家賃デス">
+<meta name="description" content="夫婦のカード請求をすぐ折半。月別推移を記録、オフライン対応。">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./app.css">
+<title>家賃デス</title>
 </head>
 <body>
-  <main class="app">
-  <header class="top">
-    <div class="mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M8 29 32 10 56 29V53H8V29Z" fill="white"/><path d="M22 30 32 40 42 30M32 40v10M21 43h22" stroke="#fc78b8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="brand"><strong>家賃<em>デス</em></strong><span>ふたりの家計を、パッと精算！</span></div>
-    <button class="round" type="button" id="openSettings" aria-label="設定を開く"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="white"/><circle cx="16" cy="17" r="3" fill="white"/></svg></button>
-  </header>
-  <section class="panel bill-card" aria-label="楽天カードの請求額">
-    <label class="eyebrow" for="billInput"><span>楽天カードの請求額</span><span class="muted">ここだけ入力！</span></label>
-    <div class="bill-field"><input id="billInput" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-label="楽天カードの請求額、円" placeholder="0"><span class="unit">円</span></div>
-    <p class="bill-hint">数字を変えるだけで、自動で計算するデス！</p>
-  </section>
-  <div class="section-title"><h2>ふたりの振込額</h2><span>自動計算</span></div>
-  <section class="people" aria-label="それぞれの振込額" aria-live="polite">
-    <div class="person a"><div class="person-name"><span class="person-dot"></span>翔太</div><div class="person-value"><span id="personA">90,000</span><small>円</small></div><div class="person-desc">固定費＋変動費＋食費</div></div>
-    <div class="person b"><div class="person-name"><span class="person-dot"></span>志穂</div><div class="person-value"><span id="personB">70,000</span><small>円</small></div><div class="person-desc">固定費＋変動費＋食費</div></div>
-  </section>
-  <section class="total" aria-label="振込合計"><div class="total-label">振込合計<span>カード請求 ＋ 食費チャージ</span></div><div class="total-number"><span id="totalAmount">160,000</span><small>円</small></div></section>
-  <section class="mini" aria-label="計算の内訳">
-    <div class="mini-card"><div class="k">固定費 合計</div><div class="v" id="fixedTotal">102,000円</div></div>
-    <div class="mini-card"><div class="k">変動費 1人分</div><div class="v" id="variableEach">15,000円</div></div>
-    <div class="mini-card"><div class="k">食費 1人分</div><div class="v" id="foodEach">14,000円</div></div>
-  </section>
-  <div id="warning" class="warning" role="status">請求額が固定費より少ないため、計算結果を確認してください。</div>
-  <div class="actions">
-    <button id="copyButton" class="copy" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>振込額をコピー</button>
-    <button id="editSettings" class="edit-inline" type="button">設定を変更 ›</button>
-  </div>
-  <p class="bottom-note">入力額と設定は、この端末に自動保存されます。</p>
-</main>
-
-  <div id="overlay" class="overlay" aria-hidden="true"></div>
-  <section id="settingsSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
-    <div class="sheet-top"><h2 id="settingsTitle">毎月の設定</h2><button id="closeSettings" class="close" type="button" aria-label="閉じる">×</button></div>
-    <p class="settings-desc">普段は変更不要です。負担額が変わったときだけ編集してください。</p>
-    <div class="settings-grid">
-      <div class="settings-field"><label class="field-label" for="settingsA">翔太の固定費</label><div class="settings-input"><input id="settingsA" type="text" inputmode="numeric" autocomplete="off"><small>円</small></div></div>
-      <div class="settings-field"><label class="field-label" for="settingsB">志穂の固定費</label><div class="settings-input"><input id="settingsB" type="text" inputmode="numeric" autocomplete="off"><small>円</small></div></div>
+<div class="app">
+ <header class="header">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 64 64"><path fill="#fff" d="M9 30 32 10 55 30v24H9z"/><path fill="none" stroke="#fa78ad" stroke-width="5" stroke-linecap="round" d="m21 31 11 10 11-10M32 41v10M22 43h20"/></svg></div>
+  <div class="brand"><strong>家賃<span>デス</span></strong><small>ふたりのお金、パッと管理！</small></div>
+  <span id="netPill" class="net-pill" aria-live="polite">保存中</span>
+ </header>
+ <main class="pages" id="pages">
+  <section class="page active" id="tab-calc" aria-label="計算">
+   <div class="bill panel">
+    <div class="labelbar"><label for="billInput">楽天カードの請求額</label><span>ここだけ入力！</span></div>
+    <div class="billbox"><input id="billInput" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" placeholder="0" aria-label="楽天カードの請求額"><b>円</b></div>
+    <div class="month-row">
+     <label for="calcMonth" class="month-label">対象月</label>
+     <input id="calcMonth" class="month-input" type="month">
+     <button id="saveMonth" type="button" class="tiny-save">この月を登録</button>
     </div>
-    <div class="settings-field"><label class="field-label" for="settingsFood">食費チャージ（カード請求とは別）</label><div class="settings-input"><input id="settingsFood" type="text" inputmode="numeric" autocomplete="off"><small>円</small></div></div>
-    <div class="settings-summary"><span>固定費の合計</span><strong id="settingsTotal">102,000円</strong></div>
-    <button id="saveSettings" class="save" type="button">設定を保存</button>
-    <p class="breakdown-note" style="text-align:center">変動費と食費は原則折半。端数1円は翔太側に加算します。</p>
+   </div>
+   <h2 class="eyeline">今月の振込額 <span>自動計算</span></h2>
+   <div class="couple" aria-live="polite">
+    <div class="person blue"><span>翔太の振込</span><strong><span id="personA">90,000</span><small>円</small></strong><em>固定費 ＋ 変動費 ＋ 食費</em></div>
+    <div class="person pink"><span>志穂の振込</span><strong><span id="personB">70,000</span><small>円</small></strong><em>固定費 ＋ 変動費 ＋ 食費</em></div>
+   </div>
+   <div class="total panel"><div><b>振込合計</b><small>カード請求 ＋ 食費チャージ</small></div><strong><span id="totalAmount">160,000</span><small>円</small></strong></div>
+   <div class="mini">
+    <div><small>固定費 合計</small><strong id="fixedTotal">102,000円</strong></div>
+    <div><small>変動費 1人分</small><strong id="variableEach">15,000円</strong></div>
+    <div><small>食費 1人分</small><strong id="foodEach">14,000円</strong></div>
+   </div>
+   <p id="calcWarning" class="warning" hidden>請求額が固定費より少ないため、計算結果を確認してください。</p>
+   <div class="calc-actions"><button id="copyButton" type="button" class="gradient">振込額をコピー</button><button id="settingsButton" type="button" class="white-button">毎月の設定</button></div>
   </section>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-  <script>
-(function() {
-"use strict";
-var KEY="yachindesu-v1";
-var defaults={bill:132000,fixedA:61000,fixedB:41000,food:28000};
-var state=Object.assign({},defaults);
-function el(id){return document.getElementById(id);}
-function format(n){return Number(n).toLocaleString("ja-JP");}
-function yen(n){return format(n)+"円";}
-function digits(v){return String(v).replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248);}).replace(/[^0-9]/g,"").slice(0,10);}
-function num(v){return Number(digits(v))||0;}
-function clamp(v){return Math.max(0,Math.min(9999999999,Math.floor(Number(v)||0)));}
-try{var saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved&&typeof saved==="object"){Object.keys(defaults).forEach(function(k){if(saved[k]!==undefined&&Number.isFinite(Number(saved[k])))state[k]=clamp(saved[k]);});}}catch(e){}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
-function calc(){
-  var f=state.fixedA+state.fixedB,variable=state.bill-f;
-  var va=Math.ceil(variable/2),vb=variable-va;
-  var fa=Math.ceil(state.food/2),fb=state.food-fa;
-  return {fixed:f,va:va,vb:vb,fa:fa,fb:fb,a:state.fixedA+va+fa,b:state.fixedB+vb+fb,total:state.bill+state.food};
-}
-function splitText(a,b){return a===b?yen(a):format(a)+" / "+yen(b);}
-function render(){
-  var r=calc();
-  el("personA").textContent=format(r.a);
-  el("personB").textContent=format(r.b);
-  el("totalAmount").textContent=format(r.total);
-  el("fixedTotal").textContent=yen(r.fixed);
-  el("variableEach").textContent=splitText(r.va,r.vb);
-  el("foodEach").textContent=splitText(r.fa,r.fb);
-  el("warning").classList.toggle("visible",state.bill<r.fixed);
-}
-var bill=el("billInput");
-bill.value=state.bill?format(state.bill):"";
-bill.addEventListener("focus",function(){
-  // 全選択するので入力開始時に古い金額や先頭の0が残らない
-  bill.value=state.bill?String(state.bill):"";
-  if(bill.value)bill.select();
-});
-bill.addEventListener("input",function(){
-  var raw=digits(bill.value).replace(/^0+(?=\d)/,"");
-  if(raw==="0")raw="";
-  bill.value=raw;
-  state.bill=clamp(raw);
-  persist();render();
-});
-bill.addEventListener("blur",function(){bill.value=state.bill?format(state.bill):"";});
-function settingInput(id){
-  var inp=el(id);
-  inp.addEventListener("focus",function(){inp.value=String(num(inp.value));inp.select();});
-  inp.addEventListener("blur",function(){inp.value=format(num(inp.value));});
-}
-["settingsA","settingsB","settingsFood"].forEach(settingInput);
-function settingsTotal(){el("settingsTotal").textContent=yen(num(el("settingsA").value)+num(el("settingsB").value));}
-["settingsA","settingsB"].forEach(function(id){el(id).addEventListener("input",settingsTotal);});
-function openSettings(){
-  el("settingsA").value=format(state.fixedA);
-  el("settingsB").value=format(state.fixedB);
-  el("settingsFood").value=format(state.food);
-  settingsTotal();
-  el("overlay").classList.add("show");
-  el("settingsSheet").classList.add("show");
-  el("settingsSheet").setAttribute("aria-hidden","false");
-  document.body.classList.add("modal-open");
-  el("closeSettings").focus();
-}
-function closeSettings(){
-  el("overlay").classList.remove("show");
-  el("settingsSheet").classList.remove("show");
-  el("settingsSheet").setAttribute("aria-hidden","true");
-  document.body.classList.remove("modal-open");
-  el("openSettings").focus();
-}
-el("openSettings").addEventListener("click",openSettings);
-el("editSettings").addEventListener("click",openSettings);
-el("closeSettings").addEventListener("click",closeSettings);
-el("overlay").addEventListener("click",closeSettings);
-document.addEventListener("keydown",function(e){if(e.key==="Escape"&&el("settingsSheet").classList.contains("show"))closeSettings();});
-var toastTimeout;
-function toast(message){el("toast").textContent=message;el("toast").classList.add("show");clearTimeout(toastTimeout);toastTimeout=setTimeout(function(){el("toast").classList.remove("show");},2000);}
-el("saveSettings").addEventListener("click",function(){
-  state.fixedA=clamp(num(el("settingsA").value));
-  state.fixedB=clamp(num(el("settingsB").value));
-  state.food=clamp(num(el("settingsFood").value));
-  persist();render();closeSettings();toast("設定を保存したデス！");
-});
-function copyText(value){
-  if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(value);
-  return new Promise(function(resolve,reject){
-    var t=document.createElement("textarea");
-    t.value=value;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.focus();t.select();
-    var ok=document.execCommand("copy");document.body.removeChild(t);
-    ok?resolve():reject(new Error("copy failed"));
-  });
-}
-el("copyButton").addEventListener("click",function(){
-  var r=calc();
-  var s="【家賃デス】\n翔太："+yen(r.a)+"\n志穂："+yen(r.b)+"\n合計："+yen(r.total)+"\n（楽天カード："+yen(state.bill)+" ＋ 食費："+yen(state.food)+"）";
-  copyText(s).then(function(){toast("コピーできたデス！");}).catch(function(){toast("コピーできませんでした");});
-});
-render();
-if("serviceWorker" in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){});});
-})();
-</script>
+  <section class="page" id="tab-history" aria-label="月別の変動" hidden>
+   <div class="section-heading"><h2>月ごとの変動 <span>HISTORY</span></h2><p>登録した請求額を月別に比較</p></div>
+   <div class="history-summary panel"><div><small>最新の登録月</small><strong id="latestMonth">—</strong></div><div><small>前月との差額</small><strong id="monthlyDelta">—</strong></div></div>
+   <div class="panel chart-wrap"><div class="chart-head"><strong>楽天カード請求額の推移</strong><small>直近6か月</small></div><div id="chart" class="chart" role="img" aria-label="6か月のカード請求額の棒グラフ"></div></div>
+   <div class="history-title"><strong>月別の記録</strong><button id="jumpMonth" type="button">今月を登録 ＋</button></div>
+   <div id="historyList" class="history-list"></div>
+   <p class="sub-note">登録月をタップすると金額を修正できます。振込額はその月の設定に基づき再計算されます。</p>
+  </section>
+  <section class="page" id="tab-share" aria-label="夫婦の共有" hidden>
+   <div class="section-heading"><h2>ふたりで共有 <span>SHARE</span></h2><p>同じデータを2台のスマホで編集</p></div>
+   <div class="panel info-card"><div class="info-icon">♡</div><h3 id="shareTitle">共有の準備中</h3><p id="shareMessage">月別記録は現在この端末に保存しています。リアルタイム共有にはFirebaseの接続が必要です。</p><span id="syncState" class="pill muted-pill">この端末のみ</span></div>
+   <div id="connectedShare" class="panel sharing-tools" hidden>
+    <div class="share-code-title">家族の共有リンク</div>
+    <p>このリンクを奥さんに送ると同じ家計データを編集できます。</p>
+    <button id="copyInvite" class="gradient" type="button">招待リンクをコピー</button>
+    <button id="leaveRoom" class="quiet" type="button">この端末の共有を解除</button>
+    <p class="sub-note">リンクを知っている人が編集できるため、第三者に送らないでください。</p>
+   </div>
+   <div id="setupShare" class="panel sharing-tools">
+    <strong>リアルタイム共同編集</strong>
+    <p>Firebase接続後、共有ルーム作成・リンク招待・自動同期が使えます。オフラインで記録した変更もオンライン復帰後に同期できます。</p>
+    <button id="startShare" class="gradient" type="button" disabled>Firebase接続後に利用可能</button>
+    <div id="joinWrap" hidden><label for="joinCode">招待コード</label><input id="joinCode" autocomplete="off" placeholder="招待リンクを貼り付け"><button id="joinShare" type="button">参加</button></div>
+    <p class="sub-note">接続設定はアプリのファイルで行います。設定方法はリポジトリのREADMEに記載。</p>
+   </div>
+  </section>
+  <section class="page" id="tab-reminder" aria-label="毎月の通知" hidden>
+   <div class="section-heading"><h2>毎月のお知らせ <span>REMIND</span></h2><p>忘れずに家賃登録</p></div>
+   <div class="panel reminder">
+    <label for="reminderDay">毎月何日にお知らせする？</label>
+    <div class="day-controls"><select id="reminderDay" aria-label="毎月の通知日"></select><span>に通知</span></div>
+    <label class="check-row"><input id="reminderEnabled" type="checkbox"><span>リマインダーをONにする</span></label>
+    <div class="preview-note"><span>通知メッセージ</span><strong>ヤチントウロクビデス！</strong><small>今月の楽天カード請求額を登録しよう</small></div>
+    <button id="askNotify" class="white-button full" type="button">通知の許可を確認</button>
+    <p id="notifyStatus" class="sub-note">通知日はこの端末に保存されます。</p>
+   </div>
+   <div class="panel caution"><strong>通知について</strong><p>アプリ起動時に指定日を確認してお知らせします。iPhoneでアプリを閉じているときにも確実にプッシュ通知を届けるには、通知サーバーの接続が必要です。</p></div>
+  </section>
+ </main>
+ <nav class="tabs" aria-label="メインメニュー">
+  <button type="button" class="active" data-tab="calc" aria-current="page"><span class="tab-icon">⌂</span><span>計算</span></button>
+  <button type="button" data-tab="history"><span class="tab-icon">▥</span><span>月別</span></button>
+  <button type="button" data-tab="share"><span class="tab-icon">♡</span><span>共有</span></button>
+  <button type="button" data-tab="reminder"><span class="tab-icon">♧</span><span>通知</span></button>
+ </nav>
+</div>
+<div id="overlay" class="overlay" hidden></div>
+<section id="settingsSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true" hidden>
+ <div class="sheet-head"><h2 id="settingsTitle">毎月の設定</h2><button type="button" id="closeSettings" aria-label="閉じる">×</button></div>
+ <p class="sub-note">固定費の差額は各自負担。残りの変動費と食費を折半します。</p>
+ <div class="settings-grid">
+  <label>翔太の固定費 <div class="setting-input"><input id="settingsA" inputmode="numeric" autocomplete="off"><span>円</span></div></label>
+  <label>志穂の固定費 <div class="setting-input"><input id="settingsB" inputmode="numeric" autocomplete="off"><span>円</span></div></label>
+ </div>
+ <label>食費チャージ（合計）<div class="setting-input"><input id="settingsFood" inputmode="numeric" autocomplete="off"><span>円</span></div></label>
+ <div class="settings-total">固定費 合計 <b id="settingsTotal">102,000円</b></div>
+ <button id="saveSettings" class="gradient full" type="button">設定を保存</button>
+</section>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="./firebase-config.js"></script>
+<script defer src="./app.js"></script>
 </body>
 </html>
