@@ -1,23 +1,31 @@
-const CACHE = "yachindesu-v2.0.0";
-const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./apple-touch-icon.png"];
-self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
+/* 家賃デス offline-first v3 */
+const CACHE="yachindesu-v3.0.0";
+const ASSETS=["./","./index.html","./app.css","./app.js","./firebase-config.js","./manifest.webmanifest","./icon.svg","./apple-touch-icon.png"];
+self.addEventListener("install",e=>{
+ e.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
-self.addEventListener("activate", event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+self.addEventListener("activate",e=>{
+ e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
-self.addEventListener("fetch", event => {
-  const request = event.request;
-  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
-  if (request.mode === "navigate") {
-    event.respondWith(fetch(request).then(response => {
-      if (response.ok) {const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache => cache.put(request,copy)));}
-      return response;
-    }).catch(async () => (await caches.match(request)) || caches.match("./index.html")));
-    return;
-  }
-  event.respondWith(fetch(request).then(response=>{
-    if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(request,copy)));}
-    return response;
-  }).catch(()=>caches.match(request)));
+self.addEventListener("fetch",e=>{
+ const r=e.request,url=new URL(r.url);
+ if(r.method!=="GET"||url.origin!==self.location.origin)return;
+ if(r.mode==="navigate"){
+  e.respondWith(fetch(r).then(res=>{
+   if(res.ok){const clone=res.clone();e.waitUntil(caches.open(CACHE).then(c=>c.put(r,clone)));}
+   return res;
+  }).catch(async()=>await caches.match(r)||await caches.match("./index.html")));
+  return;
+ }
+ e.respondWith(caches.match(r).then(hit=>hit||fetch(r).then(res=>{
+   if(res.ok){const clone=res.clone();e.waitUntil(caches.open(CACHE).then(c=>c.put(r,clone)));}
+   return res;
+ })));
+});
+self.addEventListener("notificationclick",e=>{
+ e.notification.close();
+ e.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{
+  for(const c of list){if(c.url.includes("/Yachindesu/"))return c.focus();}
+  return clients.openWindow("./");
+ }));
 });
