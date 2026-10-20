@@ -194,7 +194,8 @@ for(let i=1;i<=31;i++){const opt=document.createElement("option");opt.value=Stri
 function renderReminder(){
  $("reminderDay").value=String(state.reminder.day);$("reminderEnabled").checked=!!state.reminder.enabled;
  const permission=("Notification" in window)?Notification.permission:"未対応";
- $("notifyStatus").textContent="通知の許可："+({granted:"許可済み",denied:"拒否中",default:"未設定"}[permission]||permission)+"。アプリを閉じている間は通知サーバーが必要です。";
+ $("notifyStatus").textContent="通知の許可："+({granted:"許可済み",denied:"拒否中",default:"未設定"}[permission]||permission)+"（アプリを閉じている間の通知は未対応）";
+ if(lastFocusedTab==="reminder")scheduleFit();
 }
 $("reminderDay").addEventListener("change",e=>{state.reminder.day=Number(e.target.value);store(REMINDER,state.reminder);toast("毎月の通知日を保存したデス！");checkReminder();});
 $("reminderEnabled").addEventListener("change",e=>{state.reminder.enabled=e.target.checked;store(REMINDER,state.reminder);toast(e.target.checked?"お知らせをONにしたデス！":"お知らせをOFFにしました");checkReminder();});
@@ -236,6 +237,7 @@ function renderShare(){
   ?"TABIと同じ暗号化同期方式。月別の履歴や固定費は、共有リンクで参加した端末に自動で反映されます。"
   :"共有ルームを作成し、招待リンクを奥さんに送ってください。月別データを一緒に編集できます。";
  $("syncState").textContent=connected?(navigator.onLine?"同期対応・接続中":"オフライン保存中"):"この端末のみ";
+ if(lastFocusedTab==="share")scheduleFit();
 }
 function applyRemote(data){
  const oldMonths=Object.keys(state.months);
