@@ -17,7 +17,7 @@ service cloud.firestore {
         data.updatedAt is int;
     }
     match /rooms/{roomId}/months/{monthId} {
-      allow get, list: if signedIn() && secretRoom(roomId) && monthId.matches('^[0-9]{4}-(0[1-9]|1[0-2])$');
+      allow get, list: if signedIn() && secretRoom(roomId);
       allow create, update: if signedIn() && secretRoom(roomId) &&
         monthId.matches('^[0-9]{4}-(0[1-9]|1[0-2])$') &&
         validMonth(request.resource.data);
