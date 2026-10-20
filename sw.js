@@ -1,6 +1,6 @@
 /* 家賃デス - fast offline-first 3.1 */
-const CACHE = "yachindesu-v3.1.0";
-const ASSETS = ["./","./index.html","./app.css","./app.js","./firebase-config.js","./manifest.webmanifest","./icon.svg","./apple-touch-icon.png"];
+const CACHE="yachindesu-v4.0.0";
+const ASSETS = ["./","./index.html","./app.css","./app.js","./yachin-sync.js","./manifest.webmanifest","./icon.svg","./apple-touch-icon.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)
     .then(cache => cache.addAll(ASSETS.map(url => new Request(url,{cache:"reload"}))))
