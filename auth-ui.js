@@ -14,6 +14,7 @@ const messages={
  invalid_account:"アカウント情報が正しくありません。",
  no_household:"共有データの準備ができていません。",
  offline:"会員登録・ログインにはネット接続が必要です。",
+ invalid_invite:"招待リンクに接続できません。再度リンクを開いてください。",
  connection:"サーバーに接続できません。通信状況を確認して再試行してください。",
  conflict:"同時更新が発生しました。もう一度お試しください。",
  unsupported:"このブラウザは安全な暗号化機能に対応していません。"
@@ -69,6 +70,7 @@ function unlock(s){
 async function ensureAccountRoom(){
  await bridge.waitInvite().catch(()=>{});
  let room=bridge.getRoom();
+ if(bridge.hasInvite()&&!room)throw Error("invalid_invite");
  if(!room){room=await bridge.createRoom();}
  return room;
 }
