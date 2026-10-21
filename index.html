@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#a0dcff">
+<meta name="theme-color" content="#273149">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="家賃デス">
@@ -125,14 +125,14 @@
    <div class="auth-modes"><button type="button" id="showLogin" class="active">ログイン</button><button type="button" id="showRegister">新規登録</button></div>
    <form id="accountForm" autocomplete="on">
     <label for="accountId">ログインID</label>
-    <input id="accountId" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="半角英数字 4〜32文字" minlength="4" maxlength="32" required>
+    <input id="accountId" type="text" inputmode="text" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="半角英数字 4〜32文字" minlength="4" maxlength="32" required>
     <label for="accountPassword">パスワード</label>
     <div class="auth-password"><input id="accountPassword" type="password" autocomplete="current-password" placeholder="12文字以上" minlength="12" required><button type="button" id="togglePassword" aria-label="パスワードを表示">表示</button></div>
     <div id="accountConfirmWrap" hidden><label for="accountConfirm">パスワード（確認）</label><input id="accountConfirm" type="password" autocomplete="new-password" placeholder="もう一度入力"></div>
     <p id="authStatus" class="auth-status" role="status" aria-live="polite">登録したIDとパスワードでログインできます。</p>
     <button id="accountSubmit" class="auth-submit" type="submit">ログインする <span>→</span></button>
    </form>
-   <p class="auth-footnote">家計データは暗号化して保存。パスワードは端末・サーバーへ保存しません。ID・パスワードを忘れると別端末から復元できません。</p>
+   <p class="auth-footnote">家計データは暗号化して保存。パスワード自体は保存せず、ログイン維持用の鍵を端末内に保持します。ID・パスワードを忘れると別端末から復元できません。</p>
   </div>
   <div id="authProfile" hidden>
    <h2>マイアカウント</h2>
