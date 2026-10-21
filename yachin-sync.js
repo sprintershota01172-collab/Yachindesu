@@ -120,12 +120,13 @@ function create(options){
   setRoom(next,data,rev);status("synced");
   return next;
  }
- async function joinRoom(next){
+ async function joinRoom(next,{replaceLocal=false}={}){
   if(!validMeta(next))throw Error("invalid_invite");
   const fetched=await pull(next);
-  // 参加時はすでに存在する共有家計の設定を優先し、別の端末の履歴は月ごとにマージする。
+  // ログイン時は別ユーザーのローカル家計を混ぜずに復元する。
+  // 招待からの参加時のみ、未送信のローカル月別履歴をマージする。
   const local=cleanData(options.getData());
-  const combined=merge({settings:local.settings,months:{}},local,fetched.data);
+  const combined=replaceLocal?fetched.data:merge({settings:local.settings,months:{}},local,fetched.data);
   options.onData?.(combined);
   setRoom(next,fetched.data,fetched.revision);
   schedule(10);
