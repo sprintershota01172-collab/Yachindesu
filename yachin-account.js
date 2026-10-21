@@ -9,7 +9,7 @@ const un64=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"=".rep
 const roomOk=r=>r&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(r.roomId)&&/^[A-Za-z0-9_-]{43}$/.test(r.key);
 const cleanId=id=>String(id||"").trim().toLowerCase();
 const validId=id=>/^[a-z0-9][a-z0-9._-]{3,31}$/.test(id);
-const validPass=s=>typeof s==="string"&&s.length>=12&&s.length<=128;
+const validPass=s=>typeof s==="string"&&s.length>=1; // 任意の1文字以上。文字種・最大長は制限しない
 async function hash(str){return new Uint8Array(await crypto.subtle.digest("SHA-256",enc.encode(str)));}
 async function derive(id,password){
  const username=cleanId(id);
