@@ -86,10 +86,17 @@ async function authenticate(){
    const next=await API.register(username,password,home);
    unlock(next);
   }else{
-   const next=await API.login(username,password);
-   // 別アカウントのローカル保存データと混ざらないよう、クラウドの家計を優先して復元。
-   bridge.leave();
-   await bridge.joinHousehold(next.household,{replaceLocal:true});
+   let next=await API.login(username,password);
+   await bridge.waitInvite().catch(()=>{});
+   const invited=bridge.hasInvite()&&bridge.getRoom();
+   if(invited&&invited.roomId!==next.household.roomId){
+    next=await API.updateHousehold(next,invited);
+   }else{
+    // 新しいIDでログインしても前アカウントの入力履歴を混ぜない。
+    bridge.leave();
+    bridge.clearLocalDrafts();
+    await bridge.joinHousehold(next.household,{replaceLocal:true});
+   }
    unlock(next);
   }
   attempt=0;
@@ -157,10 +164,14 @@ async function restoreExistingSession(){
  try{
   await bridge.waitInvite();
   const current=bridge.getRoom();
-  if(current&&current.roomId!==saved.household.roomId){
-   // 招待リンクから別の家計に参加した場合、アカウントに関連付ける。
+  if(bridge.hasInvite()&&current&&current.roomId!==saved.household.roomId){
+   // 新たな招待リンクを明示的に開いたときだけ共有先を変更する。
    session=await API.updateHousehold(saved,current);profile();
   }else if(navigator.onLine!==false){
+   if(current?.roomId!==saved.household.roomId){
+    bridge.leave();
+    bridge.clearLocalDrafts();
+   }
    await bridge.joinHousehold(saved.household,{replaceLocal:true});
   }
  }catch(e){
