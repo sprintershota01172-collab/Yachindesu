@@ -1,6 +1,6 @@
-/* 家賃デス v6 — zero-first design, fast offline cache */
-const CACHE="yachindesu-v6.0.0";
-const ASSETS = ["./","./index.html","./app.css","./app.js","./yachin-sync.js","./manifest.webmanifest","./icon.svg","./apple-touch-icon.png"];
+/* 家賃デス v7 — premium design and encrypted account login */
+const CACHE="yachindesu-v7.0.0";
+const ASSETS = ["./","./index.html","./app.css","./design.css","./app.js","./yachin-account.js","./auth-ui.js","./yachin-sync.js","./manifest.webmanifest","./icon.svg","./apple-touch-icon.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)
     .then(cache => cache.addAll(ASSETS.map(url => new Request(url,{cache:"reload"}))))
