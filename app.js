@@ -29,18 +29,32 @@ let syncEngine=null,shareBusy=false;
 let lastToastTimer=0,lastFocusedTab="calc",historyPage=0,fitFrame=0;
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(lastToastTimer);lastToastTimer=setTimeout(()=>$("toast").classList.remove("show"),2300);}
 function billResult(bill,cfg){
- const fixed=cfg.fixedA+cfg.fixedB,variable=bill-fixed,variableA=Math.ceil(variable/2),variableB=variable-variableA,foodA=Math.ceil(cfg.food/2),foodB=cfg.food-foodA;
- return {fixed,variableA,variableB,foodA,foodB,shota:cfg.fixedA+variableA+foodA,shiho:cfg.fixedB+variableB+foodB,total:bill+cfg.food};
+ const fixed=cfg.fixedA+cfg.fixedB,foodA=Math.ceil(cfg.food/2),foodB=cfg.food-foodA;
+ // 0円は未入力として扱う。請求額が固定費に満たない場合は
+ // マイナスの変動費を折半せず、振込額を未確定にする。
+ if(!Number.isSafeInteger(bill)||bill<=0||bill<fixed){
+  return {valid:false,fixed,variableA:null,variableB:null,foodA,foodB,shota:null,shiho:null,total:null};
+ }
+ const variable=bill-fixed,variableA=Math.ceil(variable/2),variableB=variable-variableA;
+ return {valid:true,fixed,variableA,variableB,foodA,foodB,shota:cfg.fixedA+variableA+foodA,shiho:cfg.fixedB+variableB+foodB,total:bill+cfg.food};
 }
 function cfgForEntry(entry){
  return entry&&["fixedA","fixedB","food"].every(k=>Number.isFinite(Number(entry[k])))?{fixedA:money(entry.fixedA),fixedB:money(entry.fixedB),food:money(entry.food)}:state.settings;
 }
 function split(a,b){return a===b?yen(a):fmt(a)+" / "+yen(b);}
 function renderCalc(){
- const c=billResult(state.draft,state.settings);
- $("personA").textContent=fmt(c.shota);$("personB").textContent=fmt(c.shiho);$("totalAmount").textContent=fmt(c.total);
- $("fixedTotal").textContent=yen(c.fixed);$("variableEach").textContent=split(c.variableA,c.variableB);$("foodEach").textContent=split(c.foodA,c.foodB);
- $("calcWarning").hidden=state.draft>=c.fixed;
+ const c=billResult(state.draft,state.settings),valid=c.valid;
+ for(const [id,value] of [["personA",c.shota],["personB",c.shiho],["totalAmount",c.total]]){
+  const node=$(id);node.textContent=valid?fmt(value):"—";
+  const unit=node.parentElement.querySelector("small");if(unit)unit.hidden=!valid;
+ }
+ $("fixedTotal").textContent=yen(c.fixed);
+ $("variableEach").textContent=valid?split(c.variableA,c.variableB):"—";
+ $("foodEach").textContent=split(c.foodA,c.foodB);
+ $("calcWarning").hidden=state.draft===0||valid;
+ $("saveMonth").disabled=!valid;
+ $("copyButton").disabled=!valid;
+ scheduleFit();
 }
 function renderBill(){
  $("billInput").value=state.draft?fmt(state.draft):"";
@@ -52,6 +66,9 @@ function syncSelectedMonth(){
 }
 function saveOld(){store(OLD,{bill:state.draft,...state.settings});}
 function commitMonth(){
+ if(!billResult(state.draft,state.settings).valid){
+  toast("請求額は固定費の合計以上で登録してください");return;
+ }
  const doc={bill:state.draft,...state.settings,updatedAt:Date.now()};
  state.months[state.month]=doc;store(HISTORY,state.months);saveOld();renderHistory();renderCalc();toast(state.month.replace("-","年")+"月を登録したデス！");
  if(syncEngine)syncEngine.changed();
@@ -111,7 +128,7 @@ function historyRow(month,entry){
  const b=document.createElement("button");b.type="button";b.className="history-row";
  const left=document.createElement("div");left.className="history-left";
  const title=document.createElement("strong");title.textContent=month.replace("-","年")+"月";
- const detail=document.createElement("span");detail.textContent="翔太 "+yen(r.shota)+" / 志穂 "+yen(r.shiho);
+ const detail=document.createElement("span");detail.textContent=r.valid?("翔太 "+yen(r.shota)+" / 志穂 "+yen(r.shiho)):"振込額は未確定（請求額を修正してください）";
  left.append(title,detail);
  const right=document.createElement("div");right.className="history-number";
  right.textContent=yen(money(entry.bill));
@@ -188,6 +205,7 @@ function copy(text){
 }
 $("copyButton").addEventListener("click",()=>{
  const r=billResult(state.draft,state.settings);
+ if(!r.valid){toast("請求額を確認してください");return;}
  copy("【家賃デス】 "+state.month+"\n翔太："+yen(r.shota)+"\n志穂："+yen(r.shiho)+"\n合計："+yen(r.total)+"\n楽天カード："+yen(state.draft)+" ＋ 食費："+yen(state.settings.food)).then(()=>toast("振込額をコピーしたデス！")).catch(()=>toast("コピーできませんでした"));
 });
 for(let i=1;i<=31;i++){const opt=document.createElement("option");opt.value=String(i);opt.textContent="毎月 "+i+" 日";$("reminderDay").append(opt);}
