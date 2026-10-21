@@ -1,8 +1,8 @@
 (()=>{
 "use strict";
 const $=id=>document.getElementById(id);
-const OLD="yachindesu-v1", HISTORY="yachindesu-months-v3",REMINDER="yachindesu-remind-v3",ROOM="yachindesu-room-v3",CURMONTH="yachindesu-selected-v3";
-const DEFAULTS={bill:132000,fixedA:61000,fixedB:41000,food:28000};
+const OLD="yachindesu-v1", HISTORY="yachindesu-months-v3",REMINDER="yachindesu-remind-v3",ROOM="yachindesu-room-v3",CURMONTH="yachindesu-selected-v3",DRAFTS="yachindesu-month-drafts-v6";
+const DEFAULTS={bill:0,fixedA:61000,fixedB:41000,food:28000};
 const fmt=n=>Number(n).toLocaleString("ja-JP"),yen=n=>fmt(n)+"円";
 const digits=s=>String(s).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/[^0-9]/g,"").slice(0,10);
 const money=n=>Math.max(0,Math.min(9999999999,Math.trunc(Number(n)||0)));
@@ -14,17 +14,20 @@ const old=read(OLD,{});
 const settings={...DEFAULTS,...Object.fromEntries(["fixedA","fixedB","food"].map(k=>[k,money(old[k]===undefined?DEFAULTS[k]:old[k])]))};
 const initialMonths=read(HISTORY,{});
 const months=initialMonths&&typeof initialMonths==="object"&&!Array.isArray(initialMonths)?initialMonths:{};
+const existingDrafts=read(DRAFTS,{});
+const monthDrafts=existingDrafts&&typeof existingDrafts==="object"&&!Array.isArray(existingDrafts)?existingDrafts:{};
 settings.updatedAt=Number(old.updatedAt)||0;
 const state={
  settings,months,
  month:validMonth(read(CURMONTH,todayMonth()))?read(CURMONTH,todayMonth()):todayMonth(),
- draft:money(old.bill===undefined?DEFAULTS.bill:old.bill),
+ draft:0,
  reminder:{enabled:false,day:25,...read(REMINDER,{})},
  room:read(ROOM,"")
 };
 if(!validMonth(state.month))state.month=todayMonth();
 const snapshotMonth=state.months[state.month];
 if(snapshotMonth&&Number.isFinite(Number(snapshotMonth.bill)))state.draft=money(snapshotMonth.bill);
+else state.draft=money(monthDrafts[state.month]||0);
 let syncEngine=null,shareBusy=false;
 let lastToastTimer=0,lastFocusedTab="calc",historyPage=0,fitFrame=0;
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(lastToastTimer);lastToastTimer=setTimeout(()=>$("toast").classList.remove("show"),2300);}
@@ -54,6 +57,11 @@ function renderCalc(){
  $("calcWarning").hidden=state.draft===0||valid;
  $("saveMonth").disabled=!valid;
  $("copyButton").disabled=!valid;
+ $("billBadge").textContent=valid?"計算できたデス！":state.draft>0?"請求額を確認":"まずは入力！";
+ $("resultBadge").textContent=valid?"自動計算":state.draft>0?"金額を確認":"入力待ち";
+ $("billInput").setAttribute("aria-invalid",String(state.draft>0&&!valid));
+ $("tab-calc").classList.toggle("is-empty",state.draft===0);
+ $("tab-calc").classList.toggle("is-ready",valid);
  scheduleFit();
 }
 function renderBill(){
@@ -62,7 +70,7 @@ function renderBill(){
  renderCalc();
 }
 function syncSelectedMonth(){
- const m=state.months[state.month];state.draft=m?money(m.bill):0;renderBill();
+ const m=state.months[state.month];state.draft=m?money(m.bill):money(monthDrafts[state.month]||0);renderBill();
 }
 function saveOld(){store(OLD,{bill:state.draft,...state.settings});}
 function commitMonth(){
@@ -70,7 +78,7 @@ function commitMonth(){
   toast("請求額は固定費の合計以上で登録してください");return;
  }
  const doc={bill:state.draft,...state.settings,updatedAt:Date.now()};
- state.months[state.month]=doc;store(HISTORY,state.months);saveOld();renderHistory();renderCalc();toast(state.month.replace("-","年")+"月を登録したデス！");
+ state.months[state.month]=doc;store(HISTORY,state.months);monthDrafts[state.month]=state.draft;store(DRAFTS,monthDrafts);saveOld();renderHistory();renderCalc();toast(state.month.replace("-","年")+"月を登録したデス！");
  if(syncEngine)syncEngine.changed();
 }
 function fitActivePage(){
@@ -113,6 +121,7 @@ input.addEventListener("focus",()=>{input.value=state.draft?String(state.draft):
 input.addEventListener("input",()=>{
  let val=digits(input.value).replace(/^0+(?=\d)/,"");if(val==="0")val="";
  state.draft=money(val);input.value=val;
+ monthDrafts[state.month]=state.draft;store(DRAFTS,monthDrafts);
  saveOld();renderCalc();
 });
 input.addEventListener("blur",()=>{input.value=state.draft?fmt(state.draft):"";});
