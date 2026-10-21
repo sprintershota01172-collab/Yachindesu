@@ -2,6 +2,7 @@
 import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 const files = [
+  ["backup.html", "backup.html"],
   [
     "index.html",
     "index.html"
