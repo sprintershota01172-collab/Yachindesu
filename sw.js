@@ -1,5 +1,6 @@
-/* 家賃デス v7.1 — premium redesign and member account restoration */
-const CACHE="yachindesu-v7.1.0";
+/* 家賃デス v8 — handwritten chic; offline app shell and optional font cache */
+const CACHE="yachindesu-v8.0.0";
+const FONT_CACHE="yachindesu-hand-font-v1";
 const ASSETS = ["./","./index.html","./app.css","./design.css","./app.js","./yachin-account.js","./auth-ui.js","./yachin-sync.js","./manifest.webmanifest","./icon.svg","./apple-touch-icon.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)
@@ -8,13 +9,28 @@ self.addEventListener("install", event => {
 });
 self.addEventListener("activate", event => {
   event.waitUntil(Promise.all([
-    caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith("yachindesu-") && k !== CACHE).map(k => caches.delete(k)))),
+    caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith("yachindesu-") && k !== CACHE && k !== FONT_CACHE).map(k => caches.delete(k)))),
     self.clients.claim()
   ]));
 });
 self.addEventListener("fetch", event => {
   const req=event.request;
-  if(req.method!=="GET"||new URL(req.url).origin!==self.location.origin)return;
+  if(req.method!=="GET")return;
+  const url=new URL(req.url);
+  // Optional handwritten font files: keep the last successfully loaded copy for offline use.
+  if(url.hostname==="fonts.googleapis.com"||url.hostname==="fonts.gstatic.com"){
+    event.respondWith((async()=>{
+      const cache=await caches.open(FONT_CACHE),cached=await cache.match(req);
+      if(cached)return cached;
+      try{
+        const response=await fetch(req);
+        if(response.ok||response.type==="opaque")event.waitUntil(cache.put(req,response.clone()));
+        return response;
+      }catch(error){return Response.error();}
+    })());
+    return;
+  }
+  if(url.origin!==self.location.origin)return;
   if(req.mode==="navigate"){
     event.respondWith((async()=>{
       const cached=await caches.match("./index.html");
