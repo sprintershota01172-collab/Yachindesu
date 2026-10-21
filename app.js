@@ -310,6 +310,7 @@ $("startShare").addEventListener("click",async()=>{
  shareBusy=true;renderShare();
  try{
   await syncEngine.createRoom();
+  if(window.YachinAuthUI?.linkCurrentRoom)await window.YachinAuthUI.linkCurrentRoom();
   toast("共有ルームができたデス！");
   history.replaceState(null,"",location.pathname+location.search);
  }catch(e){
@@ -323,7 +324,8 @@ $("joinShare").addEventListener("click",async()=>{
  if(!invite){toast("有効な招待リンクを入力してください");return;}
  shareBusy=true;renderShare();
  try{
-  await syncEngine.joinRoom(invite);
+  await syncEngine.joinRoom(invite,{replaceLocal:true});
+  if(window.YachinAuthUI?.linkCurrentRoom)await window.YachinAuthUI.linkCurrentRoom();
   history.replaceState(null,"",location.pathname+location.search);
   toast("ふたりの家計に参加したデス！");
  }catch(e){
@@ -333,6 +335,7 @@ $("joinShare").addEventListener("click",async()=>{
 });
 window.addEventListener("online",()=>{statusPill(syncEngine?.getRoom()?"waiting":"local");renderShare();});
 window.addEventListener("offline",()=>{statusPill("offline");renderShare();});
+let pendingInvite=Promise.resolve();
 const initialInvite=window.YachinSync?.parseInvite(location.hash);
 if(!window.YachinSync){
  statusPill("local");
@@ -349,7 +352,7 @@ if(!window.YachinSync){
   const current=syncEngine.getRoom();
   if(!current||current.roomId!==initialInvite.roomId){
    shareBusy=true;renderShare();
-   syncEngine.joinRoom(initialInvite).then(()=>{
+   pendingInvite=syncEngine.joinRoom(initialInvite,{replaceLocal:true}).then(()=>{
     history.replaceState(null,"",location.pathname+location.search);
     toast("共有リンクから参加したデス！");
    }).catch(e=>{console.warn("invite failed",e);toast("招待リンクを確認してください");}).finally(()=>{
@@ -361,6 +364,24 @@ if(!window.YachinSync){
   }
  }
 }
+window.YachinAppBridge={
+ getRoom:()=>syncEngine?.getRoom()||null,
+ getCurrentMonth:()=>state.month,
+ hasLocalData:()=>Object.keys(state.months).length>0||state.draft>0,
+ waitInvite:()=>pendingInvite,
+ createRoom:async()=>{if(!syncEngine)throw Error("unavailable");return syncEngine.createRoom();},
+ async joinHousehold(room,{replaceLocal=true}={}){
+  if(!syncEngine)throw Error("unavailable");
+  const current=syncEngine.getRoom();
+  if(current?.roomId===room.roomId&&current.key===room.key){
+   if(navigator.onLine!==false)await syncEngine.sync();
+   return room;
+  }
+  return syncEngine.joinRoom(room,{replaceLocal});
+ },
+ sync:()=>syncEngine?.sync(),
+ leave:()=>syncEngine?.leave()
+};
 renderBill();renderHistory();renderReminder();renderShare();checkReminder();
 window.addEventListener("resize",()=>{if(lastFocusedTab==="history")renderHistory();scheduleFit();});
 window.visualViewport?.addEventListener("resize",scheduleFit);
