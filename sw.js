@@ -31,6 +31,8 @@ self.addEventListener("fetch", event => {
     return;
   }
   if(url.origin!==self.location.origin)return;
+  // Migration utility must load as its own page rather than cached app shell.
+  if(url.pathname.endsWith("/backup.html"))return;
   if(req.mode==="navigate"){
     event.respondWith((async()=>{
       const cached=await caches.match("./index.html");
