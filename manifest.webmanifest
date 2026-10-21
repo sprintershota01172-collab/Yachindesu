@@ -1,12 +1,12 @@
 {
   "name": "家賃デス - ふたりの家計",
   "short_name": "家賃デス",
-  "description": "会員登録・夫婦共有・月別の推移がわかる家計管理アプリ",
+  "description": "手書き風のシックなデザイン。夫婦共有・月別管理・会員登録ができる家計ノート",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f6f5f2",
-  "theme_color": "#273149",
+  "background_color": "#eeeae3",
+  "theme_color": "#30352f",
   "orientation": "portrait",
   "icons": [
     {
