@@ -8,7 +8,7 @@ let session=null,mode="login",busy=false,attempt=0;
 const gate=$("accountGate");
 const messages={
  invalid_id:"IDは英数字で始まる4〜32文字です。記号は . _ - が使えます。",
- weak_password:"パスワードは12〜128文字で入力してください。",
+ weak_password:"パスワードを1文字以上入力してください。文字種は自由です。",
  id_taken:"このIDは使用されています。別のIDを選ぶかログインしてください。",
  bad_credentials:"IDまたはパスワードが違います。",
  invalid_account:"アカウント情報が正しくありません。",
@@ -45,7 +45,7 @@ function setMode(m){
  $("accountPassword").setAttribute("autocomplete",reg?"new-password":"current-password");
  $("accountSubmit").innerHTML=reg?"アカウントを作成 <span>→</span>":"ログインする <span>→</span>";
  $("accountTitle").innerHTML=reg?"家計を、<span>ひとつに。</span>":"ふたりの家計、<span>ここから。</span>";
- message(reg?"この端末にある月別履歴を引き継いで登録できます。":"IDとパスワードで家計データを復元できます。");
+ message(reg?"パスワードは1文字から自由に設定できます。":"IDとパスワードで家計データを復元できます。");
 }
 function setBusy(value){
  busy=value;
