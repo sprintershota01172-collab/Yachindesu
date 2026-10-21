@@ -187,3 +187,100 @@ html,body{height:100%;height:100svh;overflow:hidden;overscroll-behavior:none}
 /* 請求額未入力・不足時は計算結果のコピーと月登録を無効にする */
 #copyButton:disabled,#saveMonth:disabled{opacity:.43;filter:saturate(.5);cursor:not-allowed;box-shadow:none}
 #calcWarning{font-weight:800;line-height:1.4}
+
+
+/* v6: 家賃デス - ゼロ初期値に合わせた穏やかなエンプティステート */
+#tab-calc .bill.panel{
+  position:relative;
+  background:linear-gradient(155deg,rgba(255,255,255,.97) 0%,rgba(255,249,253,.95) 55%,rgba(241,250,255,.95) 100%);
+  box-shadow:0 10px 28px rgba(76,125,164,.11),inset 0 1px 0 #fff;
+  border:1px solid rgba(255,255,255,.8)
+}
+#tab-calc .labelbar label{font-weight:900;letter-spacing:.006em}
+#billBadge{
+  background:linear-gradient(115deg,#8bbffb,#eeb0d5);
+  color:white;
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 4px 11px rgba(140,153,212,.13);
+  transition:background .2s,box-shadow .2s
+}
+#tab-calc.is-ready #billBadge{background:linear-gradient(115deg,#55afd5,#63c7b8)}
+#tab-calc .billbox{
+  background:linear-gradient(115deg,#fff,#fbfcff);
+  border:1.5px solid #dfeaf7;
+  box-shadow:inset 0 1px 4px rgba(88,130,190,.035);
+  border-radius:17px;
+  transition:border-color .18s,box-shadow .18s
+}
+#tab-calc .billbox:focus-within{
+  border-color:#8cbefb;
+  box-shadow:0 0 0 4px rgba(122,193,255,.15),0 5px 14px rgba(111,166,208,.08)
+}
+#tab-calc .billbox input{font-weight:900;font-variant-numeric:tabular-nums;caret-color:#ed75ae}
+#tab-calc.is-empty .billbox input::placeholder{color:#aebed2;opacity:1}
+#tab-calc .month-row .month-input{border:1px solid rgba(200,226,246,.43);background:#f0f7ff;color:#426a8a}
+#tab-calc .person{
+  position:relative;isolation:isolate;
+  border-radius:20px;
+  box-shadow:0 9px 20px rgba(103,138,192,.14);
+  overflow:hidden
+}
+#tab-calc .person::before{
+  content:"";position:absolute;pointer-events:none;
+  width:102px;height:102px;right:-36px;top:-49px;
+  background:rgba(255,255,255,.13);border-radius:50%;
+  z-index:-1
+}
+#tab-calc .person::after{
+  content:"";position:absolute;pointer-events:none;
+  width:68px;height:68px;right:16px;bottom:-47px;
+  border:2px solid rgba(255,255,255,.15);border-radius:50%;z-index:-1
+}
+#tab-calc .blue{background:linear-gradient(138deg,#77c8ff 0%,#4099eb 100%)}
+#tab-calc .pink{background:linear-gradient(138deg,#ff94c9 0%,#ed76b3 100%)}
+#tab-calc .person strong{letter-spacing:-.05em;text-shadow:0 1px 6px rgba(37,73,112,.05)}
+#tab-calc.is-empty .person strong,#tab-calc:not(.is-ready) .person strong{letter-spacing:0;color:rgba(255,255,255,.9)}
+#tab-calc .total.panel{
+  background:linear-gradient(140deg,#fff 0%,#fcf8ff 100%);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 7px 18px rgba(99,132,183,.09)
+}
+#tab-calc .total strong{color:#294e78}
+#tab-calc:not(.is-ready) .total strong{color:#91a6be}
+#tab-calc .mini>div{
+  background:rgba(255,255,255,.83);
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:0 4px 12px rgba(78,132,188,.055)
+}
+#tab-calc .calc-guide{
+  margin:0;
+  padding:8px 11px;
+  border-radius:12px;
+  background:rgba(255,255,255,.60);
+  border:1px solid rgba(255,255,255,.55);
+  color:#6d89a4;
+  font-size:10px;
+  line-height:1.35;
+  font-weight:800;
+  text-align:center
+}
+#tab-calc.is-ready .calc-guide{
+  background:rgba(233,249,248,.88);
+  color:#4f9e92
+}
+#tab-calc .gradient:not(:disabled){box-shadow:0 6px 14px rgba(149,139,213,.20)}
+#tab-calc .white-button{
+  background:rgba(255,255,255,.93);
+  border:1px solid rgba(255,255,255,.58);
+  box-shadow:0 5px 13px rgba(72,111,161,.07)
+}
+#tab-calc .gradient:disabled,#tab-calc .tiny-save:disabled{
+  opacity:.58;filter:saturate(.62);
+}
+@media(max-height:690px){
+ #tab-calc .calc-guide{padding:5px 8px;font-size:9px}
+ #tab-calc .bill.panel{padding:8px 11px}
+}
+@media(prefers-reduced-motion:reduce){
+ #tab-calc .billbox,#billBadge{transition:none}
+}
