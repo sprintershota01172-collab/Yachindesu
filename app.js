@@ -59,6 +59,7 @@ function renderCalc(){
  $("copyButton").disabled=!valid;
  $("billBadge").textContent=valid?"計算できたデス！":state.draft>0?"請求額を確認":"まずは入力！";
  $("resultBadge").textContent=valid?"自動計算":state.draft>0?"金額を確認":"入力待ち";
+ $("calcGuide").textContent=valid?"✦ この月を登録すると、月別の変動も確認できます":state.draft>0?"✦ 固定費の合計以上の請求額を入力してください":"✦ 請求額を入力すると、振込額を自動で計算します";
  $("billInput").setAttribute("aria-invalid",String(state.draft>0&&!valid));
  $("tab-calc").classList.toggle("is-empty",state.draft===0);
  $("tab-calc").classList.toggle("is-ready",valid);
