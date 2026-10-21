@@ -1,12 +1,12 @@
 {
-  "name": "家賃デス - ふたりの家計精算",
+  "name": "家賃デス - ふたりの家計",
   "short_name": "家賃デス",
-  "description": "楽天カードの請求額からふたりの振込額をすぐ計算",
+  "description": "会員登録・夫婦共有・月別の推移がわかる家計管理アプリ",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#ffcae4",
-  "theme_color": "#88cdff",
+  "background_color": "#f6f5f2",
+  "theme_color": "#273149",
   "orientation": "portrait",
   "icons": [
     {
