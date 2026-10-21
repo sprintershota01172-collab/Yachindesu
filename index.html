@@ -25,7 +25,7 @@
   <section class="page active" id="tab-calc" aria-label="計算">
    <div class="page-inner">
    <div class="bill panel">
-    <div class="labelbar"><label for="billInput">楽天カードの請求額</label><span>ここだけ入力！</span></div>
+    <div class="labelbar"><label for="billInput">楽天カードの請求額</label><span id="billBadge">まずは入力！</span></div>
     <div class="billbox"><input id="billInput" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" placeholder="0" aria-label="楽天カードの請求額"><b>円</b></div>
     <div class="month-row">
      <label for="calcMonth" class="month-label">対象月</label>
@@ -33,17 +33,18 @@
      <button id="saveMonth" type="button" class="tiny-save">この月を登録</button>
     </div>
    </div>
-   <h2 class="eyeline">今月の振込額 <span>自動計算</span></h2>
+   <h2 class="eyeline">今月の振込額 <span id="resultBadge">入力待ち</span></h2>
    <div class="couple" aria-live="polite">
-    <div class="person blue"><span>翔太の振込</span><strong><span id="personA">90,000</span><small>円</small></strong><em>固定費 ＋ 変動費 ＋ 食費</em></div>
-    <div class="person pink"><span>志穂の振込</span><strong><span id="personB">70,000</span><small>円</small></strong><em>固定費 ＋ 変動費 ＋ 食費</em></div>
+    <div class="person blue"><span>翔太の振込</span><strong><span id="personA">—</span><small hidden>円</small></strong><em>固定費 ＋ 変動費 ＋ 食費</em></div>
+    <div class="person pink"><span>志穂の振込</span><strong><span id="personB">—</span><small hidden>円</small></strong><em>固定費 ＋ 変動費 ＋ 食費</em></div>
    </div>
-   <div class="total panel"><div><b>振込合計</b><small>カード請求 ＋ 食費チャージ</small></div><strong><span id="totalAmount">160,000</span><small>円</small></strong></div>
+   <div class="total panel"><div><b>振込合計</b><small>カード請求 ＋ 食費チャージ</small></div><strong><span id="totalAmount">—</span><small hidden>円</small></strong></div>
    <div class="mini">
     <div><small>固定費 合計</small><strong id="fixedTotal">102,000円</strong></div>
-    <div><small>変動費 1人分</small><strong id="variableEach">15,000円</strong></div>
+    <div><small>変動費 1人分</small><strong id="variableEach">—</strong></div>
     <div><small>食費 1人分</small><strong id="foodEach">14,000円</strong></div>
    </div>
+   <p id="calcGuide" class="calc-guide" role="status">✦ 請求額を入力すると、振込額を自動で計算します</p>
    <p id="calcWarning" class="warning" hidden>請求額が固定費を下回っています。振込額は未確定です。</p>
    <div class="calc-actions"><button id="copyButton" type="button" class="gradient">振込額をコピー</button><button id="settingsButton" type="button" class="white-button">毎月の設定</button></div>
    </div>
