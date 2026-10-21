@@ -52,13 +52,14 @@ async function unprotect(body,session){
   return {roomId:doc.household.roomId,key:doc.household.key};
  }catch{throw Error("bad_credentials");}
 }
-async function request(session,method,body){
+async function request(session,method,body,revision){
  if(!navigator.onLine)throw Error("offline");
  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),15000);
  try{
   const token=b64(await hash("tabi-auth-v1:"+session.key));
   const headers={Authorization:"Bearer "+token};
   if(body)headers["Content-Type"]="application/octet-stream";
+  if(method==="PUT")headers["X-Tabi-Revision"]=String(revision);
   return await fetch(API+session.roomId,{method,headers,body,cache:"no-store",credentials:"omit",signal:ctl.signal});
  }catch{throw Error("connection");}
  finally{clearTimeout(timer);}
@@ -80,5 +81,21 @@ async function login(id,password){
  const household=await unprotect(await response.arrayBuffer(),account);
  const session={...account,household};remember(session);return session;
 }
-window.YachinAccounts={register,login,getSession,remember,signOut,validId,validPass};
+async function updateHousehold(session,household){
+ if(!validateSession(session)||!roomOk(household))throw Error("invalid_account");
+ for(let n=0;n<5;n++){
+  const response=await request(session,"GET");
+  if(response.status!==200)throw Error("bad_credentials");
+  const revision=Number(response.headers.get("X-Tabi-Revision"));
+  if(!Number.isSafeInteger(revision)||revision<1)throw Error("connection");
+  await unprotect(await response.arrayBuffer(),session);
+  const res=await request(session,"PUT",await protect(household,session),revision);
+  if(res.status===409)continue;
+  if(res.status!==200&&res.status!==201)throw Error("connection");
+  session.household={roomId:household.roomId,key:household.key};
+  remember(session);return session;
+ }
+ throw Error("conflict");
+}
+window.YachinAccounts={register,login,updateHousehold,getSession,remember,signOut,validId,validPass};
 })();
