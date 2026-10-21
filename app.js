@@ -278,7 +278,8 @@ function applyRemote(data){
  }
  if(document.activeElement!==input){
   const selected=state.months[state.month];
-  if(selected){state.draft=money(selected.bill);renderBill();}
+  state.draft=selected?money(selected.bill):0;
+  renderBill();
  }
  renderHistory();
  renderCalc();
@@ -365,6 +366,7 @@ if(!window.YachinSync){
  }
 }
 window.YachinAppBridge={
+ hasInvite:()=>!!initialInvite,
  getRoom:()=>syncEngine?.getRoom()||null,
  getCurrentMonth:()=>state.month,
  hasLocalData:()=>Object.keys(state.months).length>0||state.draft>0,
@@ -380,7 +382,8 @@ window.YachinAppBridge={
   return syncEngine.joinRoom(room,{replaceLocal});
  },
  sync:()=>syncEngine?.sync(),
- leave:()=>syncEngine?.leave()
+ leave:()=>syncEngine?.leave(),
+ clearLocalDrafts:()=>{for(const k of Object.keys(monthDrafts))delete monthDrafts[k];store(DRAFTS,monthDrafts);state.draft=0;renderBill();}
 };
 renderBill();renderHistory();renderReminder();renderShare();checkReminder();
 window.addEventListener("resize",()=>{if(lastFocusedTab==="history")renderHistory();scheduleFit();});
