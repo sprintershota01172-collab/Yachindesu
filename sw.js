@@ -1,5 +1,5 @@
-/* 家賃デス v7 — premium design and encrypted account login */
-const CACHE="yachindesu-v7.0.0";
+/* 家賃デス v7.1 — premium redesign and member account restoration */
+const CACHE="yachindesu-v7.1.0";
 const ASSETS = ["./","./index.html","./app.css","./design.css","./app.js","./yachin-account.js","./auth-ui.js","./yachin-sync.js","./manifest.webmanifest","./icon.svg","./apple-touch-icon.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)
