@@ -389,6 +389,7 @@ renderBill();renderHistory();renderReminder();renderShare();checkReminder();
 window.addEventListener("resize",()=>{if(lastFocusedTab==="history")renderHistory();scheduleFit();});
 window.visualViewport?.addEventListener("resize",scheduleFit);
 document.fonts?.ready?.then(scheduleFit);
+document.fonts?.addEventListener?.("loadingdone",scheduleFit);
 scheduleFit();
 if(!initialInvite)statusPill(syncEngine?.getRoom()?"waiting":"local");
 if("serviceWorker" in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});
